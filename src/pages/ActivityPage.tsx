@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, ArrowUpDown } from 'lucide-react';
 import { repository } from '../data/mockRepository';
 import { Movement, Group, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
@@ -8,17 +8,24 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
+import { NewMovementModal } from '../components/movements/NewMovementModal';
 
 export const ActivityPage: React.FC = () => {
-  const { refreshTrigger } = useOutletContext<{ refreshTrigger: number }>();
+  const { refreshTrigger, triggerRefresh } = useOutletContext<{ refreshTrigger: number; triggerRefresh: () => void }>();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+
+  // Filtros
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [selectedGroup, setSelectedGroup] = useState<string>('ALL');
+  const [selectedMember, setSelectedMember] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
+  const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
 
   const loadData = async () => {
     const movs = await repository.getMovements();
@@ -35,12 +42,24 @@ export const ActivityPage: React.FC = () => {
     loadData();
   }, [refreshTrigger]);
 
-  const filteredMovements = movements.filter((m) => {
-    if (selectedType !== 'ALL' && m.type !== selectedType) return false;
-    if (selectedGroup !== 'ALL' && m.groupId !== selectedGroup) return false;
-    if (searchQuery.trim() && !m.concept.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  const filteredMovements = movements
+    .filter((m) => {
+      if (selectedType !== 'ALL' && m.type !== selectedType) return false;
+      if (selectedGroup !== 'ALL' && m.groupId !== selectedGroup) return false;
+      if (selectedMember !== 'ALL') {
+        const isPayer = m.paidById === selectedMember;
+        const isRecipient = m.recipientId === selectedMember;
+        const isShare = m.shares.some((s) => s.userId === selectedMember);
+        if (!isPayer && !isRecipient && !isShare) return false;
+      }
+      if (searchQuery.trim() && !m.concept.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const timeA = new Date(a.date).getTime();
+      const timeB = new Date(b.date).getTime();
+      return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+    });
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -49,12 +68,12 @@ export const ActivityPage: React.FC = () => {
           Historial de Actividad
         </h1>
         <p className="text-sm text-slate-500">
-          Registro cronológico de todos los movimientos, gastos compartidos, préstamos y devoluciones.
+          Registro cronológico detallado de todos los movimientos, gastos compartidos, préstamos y devoluciones.
         </p>
       </div>
 
       {/* Barra de Filtros y Búsqueda */}
-      <Card className="space-y-3">
+      <Card className="space-y-3.5">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -66,7 +85,8 @@ export const ActivityPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
+          {/* Grupo */}
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
@@ -80,17 +100,42 @@ export const ActivityPage: React.FC = () => {
             ))}
           </select>
 
+          {/* Tipo */}
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
             className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none"
           >
-            <option value="ALL">Todos los tipos de operación</option>
+            <option value="ALL">Todos los tipos</option>
             <option value="SHARED_EXPENSE">Gastos compartidos</option>
-            <option value="INDIVIDUAL_EXPENSE">Gastos individuales (Adelantos)</option>
+            <option value="INDIVIDUAL_EXPENSE">Adelantos individuales</option>
             <option value="LOAN">Préstamos</option>
-            <option value="SETTLEMENT">Liquidaciones (Devoluciones)</option>
+            <option value="SETTLEMENT">Liquidaciones</option>
           </select>
+
+          {/* Miembro */}
+          <select
+            value={selectedMember}
+            onChange={(e) => setSelectedMember(e.target.value)}
+            className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none"
+          >
+            <option value="ALL">Cualquier participante</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name} {u.id === currentUser?.id ? '(Tú)' : ''}
+              </option>
+            ))}
+          </select>
+
+          {/* Orden de fecha */}
+          <button
+            type="button"
+            onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+            className="flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium hover:bg-slate-100"
+          >
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            <span>{sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'}</span>
+          </button>
         </div>
       </Card>
 
@@ -146,6 +191,7 @@ export const ActivityPage: React.FC = () => {
         )}
       </Card>
 
+      {/* Modal Detalle Movimiento */}
       {selectedMovement && (
         <MovementDetailModal
           movement={selectedMovement}
@@ -153,6 +199,24 @@ export const ActivityPage: React.FC = () => {
           group={groups.find((g) => g.id === selectedMovement.groupId)}
           onClose={() => setSelectedMovement(null)}
           onDeleted={loadData}
+          onEdit={(mov) => {
+            setMovementToEdit(mov);
+          }}
+        />
+      )}
+
+      {/* Modal Edición de Movimiento */}
+      {movementToEdit && (
+        <NewMovementModal
+          groups={groups}
+          currentUser={currentUser || { id: 'user-1', name: 'Usuario', email: null, isProvisional: false }}
+          movementToEdit={movementToEdit}
+          onClose={() => setMovementToEdit(null)}
+          onCreated={() => {
+            setMovementToEdit(null);
+            loadData();
+            triggerRefresh();
+          }}
         />
       )}
     </div>

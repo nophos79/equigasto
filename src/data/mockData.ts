@@ -1,4 +1,4 @@
-import { UserProfile, Group, Movement } from '../core/types';
+import type { UserProfile, Group, Movement } from '../core/types.ts';
 
 export const CURRENT_USER: UserProfile = {
   id: 'user-1',

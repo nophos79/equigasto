@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
-import { Plus, Users, X } from 'lucide-react';
+import { Plus, Users, X, UserPlus, Trash2 } from 'lucide-react';
 import { repository } from '../data/mockRepository';
 import { Group, SplitMode, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
@@ -18,6 +18,7 @@ export const GroupsPage: React.FC = () => {
   const [newGroupDesc, setNewGroupDesc] = useState('');
   const [newGroupIcon, setNewGroupIcon] = useState('🏖️');
   const [newGroupSplitMode, setNewGroupSplitMode] = useState<SplitMode>('EQUAL');
+  const [initialInvitedNames, setInitialInvitedNames] = useState<string[]>(['']);
 
   const loadData = async () => {
     const user = await repository.getCurrentUser();
@@ -38,28 +39,45 @@ export const GroupsPage: React.FC = () => {
     loadData();
   }, [refreshTrigger]);
 
+  const handleAddInvitedField = () => {
+    setInitialInvitedNames([...initialInvitedNames, '']);
+  };
+
+  const handleInvitedNameChange = (index: number, val: string) => {
+    const copy = [...initialInvitedNames];
+    copy[index] = val;
+    setInitialInvitedNames(copy);
+  };
+
+  const handleRemoveInvitedField = (index: number) => {
+    setInitialInvitedNames(initialInvitedNames.filter((_, i) => i !== index));
+  };
+
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName.trim() || !currentUser) return;
 
-    // Crear miembros para el grupo (admin + miembros invitados)
-    const membersList = [
-      { userId: currentUser.id, role: 'ADMIN' as const, percentage: 100 },
-    ];
-
-    await repository.createGroup({
+    // Crear el grupo inicialmente con el creador
+    const createdGroup = await repository.createGroup({
       name: newGroupName.trim(),
       description: newGroupDesc.trim() || undefined,
       icon: newGroupIcon,
       category: 'friends',
       createdBy: currentUser.id,
       defaultSplitMode: newGroupSplitMode,
-      members: membersList,
+      members: [{ userId: currentUser.id, role: 'ADMIN', percentage: 100 }],
     });
+
+    // Añadir miembros provisionales especificados
+    const validNames = initialInvitedNames.map((n) => n.trim()).filter(Boolean);
+    for (const name of validNames) {
+      await repository.addMemberToGroup(createdGroup.id, name);
+    }
 
     setIsCreateModalOpen(false);
     setNewGroupName('');
     setNewGroupDesc('');
+    setInitialInvitedNames(['']);
     triggerRefresh();
   };
 
@@ -96,7 +114,7 @@ export const GroupsPage: React.FC = () => {
                     </span>
                     <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      {group.members.length}
+                      {group.members.length} miembros
                     </span>
                   </div>
 
@@ -201,6 +219,44 @@ export const GroupsPage: React.FC = () => {
                   <option value="EQUAL">Partes iguales (Todos pagan igual)</option>
                   <option value="PERCENTAGE">Porcentajes personalizados</option>
                 </select>
+              </div>
+
+              {/* Añadir miembros iniciales */}
+              <div className="pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                    <UserPlus className="w-3.5 h-3.5" /> Invitar miembros provisionales:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddInvitedField}
+                    className="text-xs text-brand-600 font-semibold hover:text-brand-700"
+                  >
+                    + Añadir otro
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+                  {initialInvitedNames.map((name, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder={`Nombre participante ${idx + 1}...`}
+                        value={name}
+                        onChange={(e) => handleInvitedNameChange(idx, e.target.value)}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                      />
+                      {initialInvitedNames.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveInvitedField(idx)}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="pt-2 flex gap-3">

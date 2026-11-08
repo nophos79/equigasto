@@ -54,20 +54,24 @@ npm run build
 
 ---
 
-## 📐 Estructura de la Fase 1
+## 📐 Fases de Desarrollo
 
-- `src/core/`: Motor económico puro, independiente de la UI.
-  - `money.ts`: Conversiones exactas y formato de moneda.
-  - `balance.ts`: Cálculo de balances unificados (suma neta = 0 céntimos).
-  - `simplify.ts`: Algoritmo voraz de simplificación de transferencias.
-  - `tests/`: Batería de pruebas automatizadas.
-- `src/data/`: Capa de repositorio (`IDataRepository` + `MockRepository` con datos realistas).
-- `src/components/`:
-  - `layout/`: AppLayout, Navbar, Sidebar (Desktop) y BottomNav con botón central de acción (Móvil).
-  - `movements/`: Formulario modal rápido para gastos compartidos, individuales, préstamos y liquidaciones; y modal de detalle.
-- `src/pages/`:
-  - `DashboardPage`: Saldos globales (Te deben, Debes, Neto), accesos directos a grupos y últimos movimientos.
-  - `GroupsPage`: Gestión y listado de grupos con saldo del usuario en cada uno.
-  - `GroupDetailPage`: Pestañas de Movimientos (con filtros), Balances de miembros, Deudas simplificadas y Configuración de reparto.
-  - `ActivityPage`: Historial cronológico con filtros por grupo y tipo de movimiento.
-  - `ProfilePage`: Perfil del usuario, simulación de vinculación de provisionales y preferencias.
+### Fase 1: Arquitectura y Estructura Base ✅
+- Configuración de React 18, Vite, TypeScript y Tailwind CSS.
+- Navegación responsive (Sidebar desktop + BottomNav mobile).
+- Núcleo de cálculo económico en céntimos enteros (cero floating-point errors).
+- Repositorio desacoplado con datos realistas en memoria (`MockRepository`).
+
+### Fase 2: Diseño Funcional Completo ✅
+- **Formularios de movimientos integrales:**
+  - Gastos compartidos con reparto automático (equitativo o porcentual).
+  - Gastos individuales con imputación del 100% al beneficiario.
+  - Préstamos directos entre miembros.
+  - Devoluciones y liquidaciones directas con flujo de 1 clic desde deudas pendientes.
+  - Edición y eliminación de movimientos con recálculo dinámico.
+- **Detalle de Grupo:**
+  - Pestañas de Movimientos (filtros avanzados por tipo y participante), Balances de miembros, Deudas simplificadas, Historial de liquidaciones y Configuración.
+  - Configuración de grupo editable: cambio de nombre, modalidad de reparto y asignación de porcentajes con validador dinámico del 100%.
+  - Incorporación de participantes provisionales (sin cuenta requerida).
+- **Historial de Actividad Global:**
+  - Búsqueda en vivo por concepto, filtros por grupo, tipo de operación, participante y ordenación temporal (más recientes o más antiguos).

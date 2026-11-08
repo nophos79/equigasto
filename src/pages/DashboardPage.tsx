@@ -15,9 +15,10 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
+import { NewMovementModal } from '../components/movements/NewMovementModal';
 
 export const DashboardPage: React.FC = () => {
-  const { refreshTrigger } = useOutletContext<{ refreshTrigger: number }>();
+  const { refreshTrigger, triggerRefresh } = useOutletContext<{ refreshTrigger: number; triggerRefresh: () => void }>();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -25,6 +26,7 @@ export const DashboardPage: React.FC = () => {
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [overall, setOverall] = useState({ totalOwedCents: 0, totalOwesCents: 0, netCents: 0 });
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
+  const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -280,6 +282,24 @@ export const DashboardPage: React.FC = () => {
           group={groups.find((g) => g.id === selectedMovement.groupId)}
           onClose={() => setSelectedMovement(null)}
           onDeleted={loadData}
+          onEdit={(mov) => {
+            setMovementToEdit(mov);
+          }}
+        />
+      )}
+
+      {/* Modal Edición de Movimiento */}
+      {movementToEdit && (
+        <NewMovementModal
+          groups={groups}
+          currentUser={currentUser}
+          movementToEdit={movementToEdit}
+          onClose={() => setMovementToEdit(null)}
+          onCreated={() => {
+            setMovementToEdit(null);
+            loadData();
+            triggerRefresh();
+          }}
         />
       )}
     </div>

@@ -1,8 +1,8 @@
-import { IDataRepository } from './repository';
-import { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from '../core/types';
-import { MOCK_USERS, MOCK_GROUPS, MOCK_MOVEMENTS, CURRENT_USER } from './mockData';
-import { calculateGroupBalances } from '../core/balance';
-import { simplifyDebts } from '../core/simplify';
+import type { IDataRepository } from './repository.ts';
+import type { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from '../core/types.ts';
+import { MOCK_USERS, MOCK_GROUPS, MOCK_MOVEMENTS, CURRENT_USER } from './mockData.ts';
+import { calculateGroupBalances } from '../core/balance.ts';
+import { simplifyDebts } from '../core/simplify.ts';
 
 export class MockRepository implements IDataRepository {
   private users: UserProfile[] = [...MOCK_USERS];
@@ -39,6 +39,45 @@ export class MockRepository implements IDataRepository {
     return newGroup;
   }
 
+  async updateGroup(id: string, groupData: Partial<Group>): Promise<Group> {
+    const index = this.groups.findIndex(g => g.id === id);
+    if (index === -1) throw new Error('Grupo no encontrado');
+    this.groups[index] = { ...this.groups[index], ...groupData };
+    return this.groups[index];
+  }
+
+  async addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group> {
+    const group = await this.getGroupById(groupId);
+    if (!group) throw new Error('Grupo no encontrado');
+
+    const newUserId = `user-prov-${Date.now()}`;
+    const newProvisionalUser: UserProfile = {
+      id: newUserId,
+      name: `${name.trim()} (Invitado)`,
+      email: null,
+      isProvisional: true,
+    };
+    this.users.push(newProvisionalUser);
+
+    const existingCount = group.members.length;
+    let memberPercentage = percentage || 0;
+
+    if (group.defaultSplitMode === 'EQUAL') {
+      const newTotal = existingCount + 1;
+      const equalShare = parseFloat((100 / newTotal).toFixed(2));
+      group.members = group.members.map(m => ({ ...m, percentage: equalShare }));
+      memberPercentage = equalShare;
+    }
+
+    group.members.push({
+      userId: newUserId,
+      role: 'MEMBER',
+      percentage: memberPercentage,
+    });
+
+    return group;
+  }
+
   async getMovements(groupId?: string): Promise<Movement[]> {
     let list = [...this.movements];
     if (groupId) {
@@ -60,6 +99,13 @@ export class MockRepository implements IDataRepository {
     };
     this.movements.unshift(newMovement);
     return newMovement;
+  }
+
+  async updateMovement(id: string, movementData: Partial<Movement>): Promise<Movement> {
+    const index = this.movements.findIndex(m => m.id === id);
+    if (index === -1) throw new Error('Movimiento no encontrado');
+    this.movements[index] = { ...this.movements[index], ...movementData };
+    return this.movements[index];
   }
 
   async deleteMovement(id: string): Promise<boolean> {

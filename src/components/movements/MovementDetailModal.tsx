@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trash2, Calendar } from 'lucide-react';
+import { X, Trash2, Calendar, Edit3 } from 'lucide-react';
 import { Movement, UserProfile, Group } from '../../core/types';
 import { formatCurrency } from '../../core/money';
 import { Badge } from '../common/Badge';
@@ -12,6 +12,7 @@ interface MovementDetailModalProps {
   group?: Group;
   onClose: () => void;
   onDeleted: () => void;
+  onEdit?: (movement: Movement) => void;
 }
 
 export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
@@ -20,12 +21,17 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
   group,
   onClose,
   onDeleted,
+  onEdit,
 }) => {
   const payer = users.find((u) => u.id === movement.paidById);
   const recipient = movement.recipientId ? users.find((u) => u.id === movement.recipientId) : undefined;
 
   const handleDelete = async () => {
-    if (confirm(`¿Estás seguro de que deseas eliminar este movimiento "${movement.concept}"? Los balances del grupo se recalcularán automáticamente.`)) {
+    if (
+      confirm(
+        `¿Estás seguro de que deseas eliminar este movimiento "${movement.concept}"? Los balances del grupo se recalcularán automáticamente.`
+      )
+    ) {
       await repository.deleteMovement(movement.id);
       onDeleted();
       onClose();
@@ -43,12 +49,16 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Badge type={movement.type} />
-            {group && <span className="text-xs font-medium text-slate-500">{group.icon} {group.name}</span>}
+            {group && (
+              <span className="text-xs font-medium text-slate-500">
+                {group.icon} {group.name}
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -75,10 +85,19 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
           {/* Pagador / Actor */}
           <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl">
             <div className="flex items-center gap-3">
-              <Avatar name={payer?.name || 'Usuario'} url={payer?.avatarUrl} size="sm" isProvisional={payer?.isProvisional} />
+              <Avatar
+                name={payer?.name || 'Usuario'}
+                url={payer?.avatarUrl}
+                size="sm"
+                isProvisional={payer?.isProvisional}
+              />
               <div>
                 <p className="text-xs text-slate-400 font-medium">
-                  {movement.type === 'LOAN' ? 'Prestamista' : movement.type === 'SETTLEMENT' ? 'Quien devolvió' : 'Pagado íntegramente por'}
+                  {movement.type === 'LOAN'
+                    ? 'Prestamista'
+                    : movement.type === 'SETTLEMENT'
+                    ? 'Quién devolvió el dinero'
+                    : 'Pagado íntegramente por'}
                 </p>
                 <p className="text-sm font-bold text-slate-900">{payer?.name}</p>
               </div>
@@ -92,10 +111,19 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
           {recipient && (
             <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl">
               <div className="flex items-center gap-3">
-                <Avatar name={recipient.name} url={recipient.avatarUrl} size="sm" isProvisional={recipient.isProvisional} />
+                <Avatar
+                  name={recipient.name}
+                  url={recipient.avatarUrl}
+                  size="sm"
+                  isProvisional={recipient.isProvisional}
+                />
                 <div>
                   <p className="text-xs text-slate-400 font-medium">
-                    {movement.type === 'LOAN' ? 'Receptor del préstamo' : movement.type === 'SETTLEMENT' ? 'Receptor de la devolución' : 'Beneficiario del adelanto'}
+                    {movement.type === 'LOAN'
+                      ? 'Receptor del préstamo'
+                      : movement.type === 'SETTLEMENT'
+                      ? 'Receptor de la devolución'
+                      : 'Beneficiario del adelanto'}
                   </p>
                   <p className="text-sm font-bold text-slate-900">{recipient.name}</p>
                 </div>
@@ -121,7 +149,12 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
                       className="flex items-center justify-between text-sm py-2 px-3 border border-slate-100 rounded-xl"
                     >
                       <div className="flex items-center gap-2">
-                        <Avatar name={shareUser?.name || 'Usuario'} url={shareUser?.avatarUrl} size="sm" isProvisional={shareUser?.isProvisional} />
+                        <Avatar
+                          name={shareUser?.name || 'Usuario'}
+                          url={shareUser?.avatarUrl}
+                          size="sm"
+                          isProvisional={shareUser?.isProvisional}
+                        />
                         <span className="font-medium text-slate-800">{shareUser?.name}</span>
                         {share.percentage && (
                           <span className="text-xs text-slate-400">({share.percentage}%)</span>
@@ -145,14 +178,29 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
             className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-xl transition-colors"
           >
             <Trash2 className="w-4 h-4" />
-            <span>Eliminar movimiento</span>
+            <span>Eliminar</span>
           </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800"
-          >
-            Cerrar
-          </button>
+
+          <div className="flex items-center gap-2">
+            {onEdit && (
+              <button
+                onClick={() => {
+                  onEdit(movement);
+                  onClose();
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-sm transition-colors"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Editar</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
     </div>
