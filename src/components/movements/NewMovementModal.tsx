@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Users, UserCheck, ArrowRightLeft, CreditCard, Percent, AlertCircle } from 'lucide-react';
-import { Group, MovementType, SplitMode, UserProfile, Movement } from '../../core/types';
-import { eurosToCents, centsToEuros, splitEqually } from '../../core/money';
+import { Group, MovementType, SplitMode, UserProfile, Movement, SimplifiedDebt } from '../../core/types';
+import { eurosToCents, centsToEuros, splitEqually, formatCurrency } from '../../core/money';
+import { splitByPercentages } from '../../core/split';
+import { validateSettlement } from '../../core/settlement';
 import { repository } from '../../data/mockRepository';
 
 interface NewMovementModalProps {
@@ -65,11 +67,18 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   );
   const [customPercentages, setCustomPercentages] = useState<Record<string, number>>({});
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+  const [groupDebts, setGroupDebts] = useState<SimplifiedDebt[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     repository.getUsers().then(setAllUsers);
   }, []);
+
+  useEffect(() => {
+    if (selectedGroupId) {
+      repository.getGroupDebts(selectedGroupId).then(setGroupDebts);
+    }
+  }, [selectedGroupId]);
 
   const currentGroup = groups.find((g) => g.id === selectedGroupId) || groups[0];
 
@@ -139,25 +148,12 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           amountCents: splits[idx],
         }));
       } else {
-        // Porcentual
-        let sumAssigned = 0;
-        shares = groupMembers.map((m, idx) => {
-          const pct = customPercentages[m.userId] ?? m.percentage;
-          const shareCents = Math.round((amountCents * pct) / 100);
-          if (idx === memberCount - 1) {
-            return {
-              userId: m.userId,
-              amountCents: amountCents - sumAssigned,
-              percentage: pct,
-            };
-          }
-          sumAssigned += shareCents;
-          return {
-            userId: m.userId,
-            amountCents: shareCents,
-            percentage: pct,
-          };
-        });
+        // Porcentual determinista con Resto Mayor (Hare-Niemeyer)
+        const pctConfigs = groupMembers.map((m) => ({
+          userId: m.userId,
+          percentage: customPercentages[m.userId] ?? m.percentage,
+        }));
+        shares = splitByPercentages(amountCents, pctConfigs);
       }
     } else if (type === 'INDIVIDUAL_EXPENSE' || type === 'LOAN') {
       shares = [{ userId: recipientId, amountCents }];
@@ -447,6 +443,38 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                 </p>
               )}
             </div>
+          )}
+
+          {/* Aviso inteligente de liquidación / deuda inversa */}
+          {type === 'SETTLEMENT' && amountInput && (
+            (() => {
+              const validation = validateSettlement(
+                paidById,
+                recipientId,
+                eurosToCents(amountInput),
+                groupDebts
+              );
+              if (validation.warningMessage) {
+                return (
+                  <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900 space-y-2">
+                    <p className="flex items-start gap-1.5 font-medium">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <span>{validation.warningMessage}</span>
+                    </p>
+                    {validation.currentDebtCents > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setAmountInput(centsToEuros(validation.currentDebtCents).toString())}
+                        className="text-[11px] font-bold text-amber-800 underline hover:text-amber-900"
+                      >
+                        Ajustar importe a la deuda exacta ({formatCurrency(validation.currentDebtCents)})
+                      </button>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            })()
           )}
 
           {/* Fecha */}

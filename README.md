@@ -63,15 +63,14 @@ npm run build
 - Repositorio desacoplado con datos realistas en memoria (`MockRepository`).
 
 ### Fase 2: Diseño Funcional Completo ✅
-- **Formularios de movimientos integrales:**
-  - Gastos compartidos con reparto automático (equitativo o porcentual).
-  - Gastos individuales con imputación del 100% al beneficiario.
-  - Préstamos directos entre miembros.
-  - Devoluciones y liquidaciones directas con flujo de 1 clic desde deudas pendientes.
-  - Edición y eliminación de movimientos con recálculo dinámico.
-- **Detalle de Grupo:**
-  - Pestañas de Movimientos (filtros avanzados por tipo y participante), Balances de miembros, Deudas simplificadas, Historial de liquidaciones y Configuración.
-  - Configuración de grupo editable: cambio de nombre, modalidad de reparto y asignación de porcentajes con validador dinámico del 100%.
-  - Incorporación de participantes provisionales (sin cuenta requerida).
-- **Historial de Actividad Global:**
-  - Búsqueda en vivo por concepto, filtros por grupo, tipo de operación, participante y ordenación temporal (más recientes o más antiguos).
+- Formularios de movimientos integrales (compartido, individual, préstamo, liquidación).
+- Detalle de grupo con 5 pestañas (Movimientos con filtros, Balances, Deudas simplificadas, Liquidaciones y Configuración).
+- Configuración de grupo con ajuste de porcentajes y miembros provisionales.
+- Historial global con búsqueda en vivo, filtros y ordenación cronológica.
+
+### Fase 3: Motor Económico y Pruebas Automatizadas Rigurosas ✅
+- **Aritmética estricta en céntimos enteros:** Eliminación total de errores por coma flotante IEEE 754.
+- **Reparto Porcentual Determinista:** Implementación del *Método del Resto Mayor (Hare-Niemeyer)* garantizando que la suma de partes cuadre exactamente con el total céntimo a céntimo, incluso en casos extremos (ej. repartir 1 céntimo o sumas fraccionarias complejas).
+- **Simplificación de Deudas:** Algoritmo voraz optimizado que resuelve cadenas transitivas (A -> B -> C colapsa a 1 transferencia directa) y deudas circulares (0 transferencias).
+- **Validación Inteligente de Liquidaciones:** Detección de sobrepagos y advertencias de deudas inversas incoherentes con opción de ajuste automático a la deuda pendiente.
+- **Suite de pruebas unitarias:** 21 pruebas automatizadas pasando al 100% en Node nativo (`npm test`).
