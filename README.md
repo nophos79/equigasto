@@ -74,3 +74,18 @@ npm run build
 - **Simplificación de Deudas:** Algoritmo voraz optimizado que resuelve cadenas transitivas (A -> B -> C colapsa a 1 transferencia directa) y deudas circulares (0 transferencias).
 - **Validación Inteligente de Liquidaciones:** Detección de sobrepagos y advertencias de deudas inversas incoherentes con opción de ajuste automático a la deuda pendiente.
 - **Suite de pruebas unitarias:** 21 pruebas automatizadas pasando al 100% en Node nativo (`npm test`).
+
+### Fase 4: Backend con PostgreSQL y Supabase ✅
+- **Esquema Relacional en PostgreSQL (`supabase/schema.sql`):**
+  - Tablas: `profiles`, `groups`, `group_members`, `movements`, `movement_shares`, `invitations`.
+  - Integridad de importes en céntimos (`bigint`, `check amount_cents > 0`).
+  - Índices optimizados para consultas por grupo y orden temporal.
+- **Seguridad y Aislamiento con Row Level Security (RLS):**
+  - Políticas de acceso que impiden a cualquier usuario ver o modificar grupos ajenos.
+  - Función de seguridad `is_member_of_group(p_group_id)` ejecutada en el motor de la base de datos.
+- **Gestión de Participantes Provisionales e Invitaciones:**
+  - Soporte para miembros provisionales (invitados sin cuenta registrada).
+  - Función `claim_provisional_profile` para consolidar y transferir todo el historial de movimientos cuando el participante se registra.
+- **Cliente Supabase y Repositorio Desacoplado:**
+  - `SupabaseRepository` implementando `IDataRepository`.
+  - Adaptador inteligente con conmutación dinámica y protección de credenciales vía variables de entorno (`.env.local`).

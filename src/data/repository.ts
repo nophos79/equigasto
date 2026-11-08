@@ -1,4 +1,4 @@
-import { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from '../core/types';
+import type { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from '../core/types.ts';
 
 export interface IDataRepository {
   getCurrentUser(): Promise<UserProfile>;

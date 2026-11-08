@@ -154,4 +154,4 @@ export class MockRepository implements IDataRepository {
 }
 
 // Instancia singleton para la aplicación
-export const repository = new MockRepository();
+export { repository } from './index.ts';
