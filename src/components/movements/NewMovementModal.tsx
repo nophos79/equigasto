@@ -196,9 +196,9 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               {isEditing ? 'Editar Movimiento' : 'Registrar Movimiento'}
             </h2>
-            <p className="text-xs text-slate-400">
-              {type === 'SETTLEMENT' ? 'Liquidación de saldos y devoluciones' : 'Rápido, exacto y sin complicaciones'}
-            </p>
+            {type === 'SETTLEMENT' && (
+              <p className="text-xs text-slate-400">Liquidación de saldos y devoluciones</p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -479,7 +479,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white dark:[color-scheme:dark] rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
             />
           </div>
 

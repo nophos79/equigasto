@@ -69,7 +69,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
         </div>
 
         {/* Amount & Title */}
-        <div className="p-6 text-center border-b border-slate-100 bg-slate-50/50">
+        <div className="p-6 text-center border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
           <h2 className="text-2xl font-bold text-slate-900 mb-1">{movement.concept}</h2>
           <p className="text-3xl font-extrabold text-slate-900 tracking-tight">
             {formatCurrency(movement.amountCents)}
@@ -83,7 +83,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
         {/* Content details */}
         <div className="p-6 space-y-4">
           {/* Pagador / Actor */}
-          <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl">
+          <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
             <div className="flex items-center gap-3">
               <Avatar
                 name={payer?.name || 'Usuario'}
@@ -108,7 +108,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
 
           {/* Si es adelanto, préstamo o devolución directa */}
           {recipient && (
-            <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl">
+            <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
               <div className="flex items-center gap-3">
                 <Avatar
                   name={recipient.name}
