@@ -11,8 +11,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { AuthPage } from './pages/AuthPage';
 import { useAuth } from './hooks/useAuth';
 import { isSupabaseConfigured } from './data/supabaseClient';
+import { ThemeProvider } from './context/ThemeContext';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const { session, loading, busy, error, signIn, signUp, resend, signOut, clearError } = useAuth();
 
   if (!isSupabaseConfigured) {
@@ -61,6 +62,14 @@ export const App: React.FC = () => {
         </Route>
       </Routes>
     </BrowserRouter>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 };
 

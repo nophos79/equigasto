@@ -248,7 +248,7 @@ export const GroupDetailPage: React.FC = () => {
           </div>
 
           {/* Banner de Saldo del Usuario en el Grupo */}
-          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <span className="text-xs sm:text-sm font-medium text-slate-500">
               Tu situación económica en este grupo:
             </span>
@@ -329,7 +329,7 @@ export const GroupDetailPage: React.FC = () => {
       {activeTab === 'movements' && (
         <div className="space-y-4">
           {/* Filtros avanzados */}
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center justify-between bg-white p-3.5 rounded-2xl border border-slate-100">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center justify-between bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" /> Tipo:
@@ -340,8 +340,8 @@ export const GroupDetailPage: React.FC = () => {
                   onClick={() => setTypeFilter(t)}
                   className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors whitespace-nowrap ${
                     typeFilter === t
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                      : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   {t === 'ALL'
@@ -363,7 +363,7 @@ export const GroupDetailPage: React.FC = () => {
               <select
                 value={memberFilter}
                 onChange={(e) => setMemberFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none"
+                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
               >
                 <option value="ALL">Todos los miembros</option>
                 {group.members.map((m) => {
@@ -379,9 +379,9 @@ export const GroupDetailPage: React.FC = () => {
             )}
           </div>
 
-          <Card className="divide-y divide-slate-100 p-0 overflow-hidden">
+          <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
             {filteredMovements.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-sm">
+              <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
                 No hay movimientos con los filtros seleccionados.
               </div>
             ) : (
@@ -564,7 +564,7 @@ export const GroupDetailPage: React.FC = () => {
             Registro exclusivo de transferencias, bizums y devoluciones realizadas para saldar deudas pendientes.
           </p>
 
-          <Card className="divide-y divide-slate-100 p-0 overflow-hidden">
+          <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
             {settlementMovements.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-sm">
                 No se han registrado devoluciones ni liquidaciones todavía en este grupo.
@@ -632,7 +632,7 @@ export const GroupDetailPage: React.FC = () => {
                     required
                     value={editGroupName}
                     onChange={(e) => setEditGroupName(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   />
                 </div>
 
@@ -644,7 +644,7 @@ export const GroupDetailPage: React.FC = () => {
                     type="text"
                     value={editGroupDesc}
                     onChange={(e) => setEditGroupDesc(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -656,7 +656,7 @@ export const GroupDetailPage: React.FC = () => {
                 <select
                   value={editSplitMode}
                   onChange={(e) => setEditSplitMode(e.target.value as SplitMode)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
                 >
                   <option value="EQUAL">Partes iguales (Todos asumen la misma fracción)</option>
                   <option value="PERCENTAGE">Porcentajes personalizados por miembro</option>
@@ -668,7 +668,7 @@ export const GroupDetailPage: React.FC = () => {
 
               {/* Ajuste de Porcentajes */}
               {editSplitMode === 'PERCENTAGE' && (
-                <div className="pt-2 border-t border-slate-100 space-y-3">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
                       <Percent className="w-3.5 h-3.5" /> Asignación de porcentajes por miembro:

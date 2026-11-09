@@ -1,24 +1,19 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { repository } from '../../data/index';
-import { useRealtime } from '../../hooks/useRealtime';
-import { calculateMovementImpact } from '../../core/balance';
+import { Movement, Group, UserProfile } from '../../core/types';
 import { formatCurrency } from '../../core/money';
-import type { Group, Movement, UserProfile } from '../../core/types';
-
-const MAX_ITEMS = 8;
-const storageKey = (userId: string) => 'equigasto:notif-seen:' + userId;
+import { calculateMovementImpact } from '../../core/balance';
+import { useRealtime } from '../../hooks/useRealtime';
 
 interface NotificationsBellProps {
   currentUserId: string;
 }
 
-/**
- * Campana de notificaciones: muestra los últimos movimientos de tus grupos.
- * Cuenta como "nuevo" lo registrado desde la última vez que abriste la campana
- * (guardado en este navegador) que no hayas pagado tú y que te afecte.
- */
+const MAX_ITEMS = 8;
+const storageKey = (uid: string) => 'notifications-last-seen-' + uid;
+
 export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUserId }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -75,7 +70,7 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
       <button
         type="button"
         onClick={handleToggle}
-        className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors relative"
+        className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800 rounded-xl transition-colors relative"
         title="Notificaciones"
         aria-label="Notificaciones"
       >
@@ -90,15 +85,15 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={closeAndMarkSeen} />
-          <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100">
-              <p className="text-sm font-bold text-slate-900">Actividad reciente</p>
+          <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">Actividad reciente</p>
             </div>
 
             {movements.length === 0 ? (
-              <p className="p-6 text-center text-xs text-slate-400">No hay actividad todavía.</p>
+              <p className="p-6 text-center text-xs text-slate-400 dark:text-slate-500">No hay actividad todavía.</p>
             ) : (
-              <ul className="max-h-96 overflow-y-auto divide-y divide-slate-100">
+              <ul className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {movements.map((m) => {
                   const payer = users.find((u) => u.id === m.paidById);
                   const group = groups.find((g) => g.id === m.groupId);
@@ -111,15 +106,17 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
                           closeAndMarkSeen();
                           navigate('/groups/' + m.groupId);
                         }}
-                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 ${isUnread(m) ? 'bg-brand-50/60' : ''}`}
+                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-colors ${
+                          isUnread(m) ? 'bg-brand-50/60 dark:bg-brand-950/40' : ''
+                        }`}
                       >
-                        <p className="text-sm font-semibold text-slate-900 truncate">{m.concept}</p>
-                        <p className="text-xs text-slate-400 mt-0.5 truncate">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{m.concept}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                           {group?.icon} {group?.name} · {m.paidById === currentUserId ? 'Pagaste tú' : 'Pagó ' + (payer?.name ?? 'alguien')} ·{' '}
                           {formatCurrency(m.amountCents)}
                         </p>
                         {net !== 0 && (
-                          <p className={`text-xs font-semibold mt-0.5 ${net > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          <p className={`text-xs font-semibold mt-0.5 ${net > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                             {net > 0 ? 'Te deben ' + formatCurrency(net) : 'Debes ' + formatCurrency(-net)}
                           </p>
                         )}

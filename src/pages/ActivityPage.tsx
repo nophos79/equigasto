@@ -65,7 +65,7 @@ export const ActivityPage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Historial de Actividad
         </h1>
         <p className="text-sm text-slate-500">
@@ -82,7 +82,7 @@ export const ActivityPage: React.FC = () => {
             placeholder="Buscar por concepto (cena, alquiler, billete...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
 
@@ -91,7 +91,7 @@ export const ActivityPage: React.FC = () => {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
           >
             <option value="ALL">Todos los grupos</option>
             {groups.map((g) => (
@@ -105,7 +105,7 @@ export const ActivityPage: React.FC = () => {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
           >
             <option value="ALL">Todos los tipos</option>
             <option value="SHARED_EXPENSE">Gastos compartidos</option>
@@ -119,7 +119,7 @@ export const ActivityPage: React.FC = () => {
           <select
             value={selectedMember}
             onChange={(e) => setSelectedMember(e.target.value)}
-            className="bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
           >
             <option value="ALL">Cualquier participante</option>
             {users.map((u) => (
@@ -133,7 +133,7 @@ export const ActivityPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
-            className="flex items-center justify-center gap-1.5 bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2 text-slate-700 font-medium hover:bg-slate-100"
+            className="flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100"
           >
             <ArrowUpDown className="w-3.5 h-3.5" />
             <span>{sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'}</span>
@@ -142,7 +142,7 @@ export const ActivityPage: React.FC = () => {
       </Card>
 
       {/* Lista de Movimientos */}
-      <Card className="divide-y divide-slate-100 p-0 overflow-hidden">
+      <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
         {filteredMovements.length === 0 ? (
           <div className="p-10 text-center text-slate-400 text-sm">
             No se han encontrado movimientos con los filtros aplicados.

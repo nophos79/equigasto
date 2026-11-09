@@ -189,11 +189,11 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               {isEditing ? 'Editar Movimiento' : 'Registrar Movimiento'}
             </h2>
             <p className="text-xs text-slate-400">
@@ -202,7 +202,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
+            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400"
           >
             <X className="w-5 h-5" />
           </button>
@@ -210,14 +210,14 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
         {/* Tipo de movimiento selector */}
         {!isEditing && isSingleMemberGroup ? (
-          <div className="p-3 bg-indigo-50/50 border-b border-indigo-100 grid grid-cols-2 gap-2">
+          <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-900/50 grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => setType('SHARED_EXPENSE')}
               className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                 type !== 'INCOME'
                   ? 'bg-rose-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <TrendingDown className="w-4 h-4" />
@@ -229,7 +229,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                 type === 'INCOME'
                   ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <TrendingUp className="w-4 h-4" />
@@ -237,14 +237,14 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             </button>
           </div>
         ) : !isEditing && (
-          <div className="p-4 bg-slate-50/70 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <div className="p-4 bg-slate-50/70 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               type="button"
               onClick={() => setType('SHARED_EXPENSE')}
               className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all ${
                 type === 'SHARED_EXPENSE'
                   ? 'bg-brand-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <Users className="w-4 h-4" />
@@ -257,7 +257,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all ${
                 type === 'INDIVIDUAL_EXPENSE'
                   ? 'bg-amber-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <UserCheck className="w-4 h-4" />
@@ -270,7 +270,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all ${
                 type === 'LOAN'
                   ? 'bg-purple-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <ArrowRightLeft className="w-4 h-4" />
@@ -283,7 +283,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-xs font-medium transition-all ${
                 type === 'SETTLEMENT'
                   ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
               <CreditCard className="w-4 h-4" />
@@ -296,11 +296,11 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {/* Grupo */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Grupo</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Grupo</label>
             <select
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none"
             >
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
@@ -312,7 +312,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
           {/* Importe grande */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Importe (€)</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Importe (€)</label>
             <div className="relative">
               <input
                 type="number"
@@ -322,7 +322,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                 required
                 value={amountInput}
                 onChange={(e) => setAmountInput(e.target.value)}
-                className="w-full text-2xl font-bold px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none pr-10"
+                className="w-full text-2xl font-bold px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none pr-10"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">
                 €
@@ -332,7 +332,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
           {/* Concepto */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Concepto</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Concepto</label>
             <input
               type="text"
               placeholder={
@@ -351,7 +351,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               required
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
             />
           </div>
 
@@ -359,7 +359,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           {!isSingleMemberGroup && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                 {type === 'LOAN'
                   ? 'Quién presta'
                   : type === 'SETTLEMENT'
@@ -369,7 +369,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               <select
                 value={paidById}
                 onChange={(e) => setPaidById(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               >
                 {groupMembers.map((m) => (
                   <option key={m.userId} value={m.userId}>
@@ -381,7 +381,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
             {type !== 'SHARED_EXPENSE' && (
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                   {type === 'LOAN'
                     ? 'Quién recibe'
                     : type === 'INDIVIDUAL_EXPENSE'
@@ -391,7 +391,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                 <select
                   value={recipientId}
                   onChange={(e) => setRecipientId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
                 >
                   {groupMembers
                     .filter((m) => m.userId !== paidById)
@@ -409,8 +409,8 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
           {/* Reparto definido a nivel de grupo (solo lectura para grupos compartidos) */}
           {type === 'SHARED_EXPENSE' && !isSingleMemberGroup && (
-            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 text-xs">
-              <p className="font-semibold text-slate-700 flex items-center gap-1">
+            <div className="bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+              <p className="font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                 <Percent className="w-3.5 h-3.5" />
                 {splitMode === 'EQUAL'
                   ? 'Reparto a partes iguales (configuración del grupo)'
@@ -474,12 +474,12 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
           {/* Fecha */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Fecha</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Fecha</label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
             />
           </div>
 
@@ -488,7 +488,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50"
+              className="flex-1 py-2.5 px-4 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               Cancelar
             </button>

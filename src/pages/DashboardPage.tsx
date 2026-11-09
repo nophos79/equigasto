@@ -76,7 +76,7 @@ export const DashboardPage: React.FC = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Hola, {currentUser.name.split(' ')[0]} 👋
             </h1>
             <p className="text-sm text-slate-500">Aquí tienes el estado actual de tus cuentas y grupos.</p>
@@ -86,7 +86,7 @@ export const DashboardPage: React.FC = () => {
         {/* Balance Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-5">
           {/* Te deben */}
-          <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border-emerald-100">
+          <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 dark:from-emerald-950/30 dark:to-teal-950/20 border-emerald-100 dark:border-emerald-900/40">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
                 Te deben en total
@@ -121,12 +121,12 @@ export const DashboardPage: React.FC = () => {
           <Card
             className={`border ${
               overall.netCents >= 0
-                ? 'bg-gradient-to-br from-indigo-500/10 to-brand-500/5 border-indigo-100'
+                ? 'bg-gradient-to-br from-indigo-500/10 to-brand-500/5 dark:from-indigo-950/30 dark:to-brand-950/20 border-indigo-100 dark:border-indigo-900/40'
                 : 'bg-gradient-to-br from-slate-100 to-slate-50 border-slate-200'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Balance global neto
               </span>
               <div className="p-2 bg-indigo-100 text-brand-700 rounded-xl">
@@ -156,7 +156,7 @@ export const DashboardPage: React.FC = () => {
         <div className="flex items-center justify-between mb-3.5">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-brand-600" />
-            <h2 className="text-lg font-bold text-slate-900">Mis Grupos Activos</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Mis Grupos Activos</h2>
           </div>
           <Link
             to="/groups"
@@ -176,7 +176,7 @@ export const DashboardPage: React.FC = () => {
                 <Card hoverable className="h-full flex flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between mb-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shadow-inner">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-2xl shadow-inner">
                         {group.icon}
                       </div>
                       {isIndividual ? (
@@ -185,13 +185,13 @@ export const DashboardPage: React.FC = () => {
                           Personal
                         </span>
                       ) : (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                           {group.members.length} miembros
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-bold text-slate-900 text-base mb-1 group-hover:text-brand-600">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base mb-1 group-hover:text-brand-600">
                       {group.name}
                     </h3>
                     {group.description && (
@@ -199,7 +199,7 @@ export const DashboardPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs mt-2">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-2">
                     <span className="text-slate-400">
                       {isIndividual ? 'Tipo:' : 'Tu balance:'}
                     </span>
@@ -234,7 +234,7 @@ export const DashboardPage: React.FC = () => {
       {/* Actividad Reciente */}
       <div>
         <div className="flex items-center justify-between mb-3.5">
-          <h2 className="text-lg font-bold text-slate-900">Actividad Reciente</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Actividad Reciente</h2>
           <Link
             to="/activity"
             className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-0.5"
@@ -243,9 +243,9 @@ export const DashboardPage: React.FC = () => {
           </Link>
         </div>
 
-        <Card className="divide-y divide-slate-100 p-0 overflow-hidden">
+        <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
           {recentMovements.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-sm">
+            <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
               No hay movimientos registrados todavía.
             </div>
           ) : (

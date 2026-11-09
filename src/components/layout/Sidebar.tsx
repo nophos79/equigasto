@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Users, Activity, User, PlusCircle, ShieldCheck } from 'lucide-react';
 import { UserProfile } from '../../core/types';
 import { Avatar } from '../common/Avatar';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface SidebarProps {
   currentUser: UserProfile;
@@ -18,7 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 border-r border-slate-100 bg-white h-screen sticky top-0 p-5 justify-between">
+    <aside className="hidden lg:flex flex-col w-64 border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 h-screen sticky top-0 p-5 justify-between transition-colors">
       <div>
         {/* Brand */}
         <div className="flex items-center gap-3 px-2 py-1 mb-8">
@@ -26,8 +27,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
             €
           </div>
           <div>
-            <h1 className="font-bold text-slate-900 text-lg leading-tight">EquiGasto</h1>
-            <p className="text-xs text-slate-400">Control de deudas y gastos</p>
+            <h1 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">EquiGasto</h1>
+            <p className="text-xs text-slate-400 dark:text-slate-400">Control de deudas y gastos</p>
           </div>
         </div>
 
@@ -52,8 +53,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-brand-50 text-brand-700 font-semibold'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 font-semibold'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`
                 }
               >
@@ -65,18 +66,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
         </nav>
       </div>
 
-      {/* Footer / User info */}
-      <div className="border-t border-slate-100 pt-4 space-y-3">
+      {/* Footer / User info & Theme */}
+      <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
+        <div className="flex items-center justify-between px-2">
+          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Tema
+          </span>
+          <ThemeToggle showLabel />
+        </div>
+
         <div className="flex items-center gap-3 px-2">
           <Avatar name={currentUser.name} url={currentUser.avatarUrl} size="md" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">{currentUser.name}</p>
-            <p className="text-xs text-slate-400 truncate">{currentUser.email}</p>
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{currentUser.name}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{currentUser.email}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2 text-xs text-slate-400">
+        <div className="flex items-center gap-1.5 px-2 text-xs text-slate-400 dark:text-slate-500">
           <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>Seguridad RLS + Mock DB</span>
+          <span>Seguridad RLS Supabase</span>
         </div>
       </div>
     </aside>

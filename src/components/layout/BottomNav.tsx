@@ -8,14 +8,14 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ onOpenNewMovement }) => {
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 pb-safe">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 px-2 pb-safe transition-colors">
       <nav className="flex items-center justify-around h-16 max-w-md mx-auto relative">
         <NavLink
           to="/"
           end
           className={({ isActive }) =>
             `flex flex-col items-center justify-center flex-1 py-1 text-xs font-medium transition-colors ${
-              isActive ? 'text-brand-600' : 'text-slate-400 hover:text-slate-600'
+              isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`
           }
         >
@@ -27,7 +27,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenNewMovement }) => {
           to="/groups"
           className={({ isActive }) =>
             `flex flex-col items-center justify-center flex-1 py-1 text-xs font-medium transition-colors ${
-              isActive ? 'text-brand-600' : 'text-slate-400 hover:text-slate-600'
+              isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`
           }
         >
@@ -40,7 +40,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenNewMovement }) => {
           <button
             onClick={onOpenNewMovement}
             aria-label="Registrar nuevo movimiento"
-            className="w-13 h-13 w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/40 active:scale-95 transition-transform border-4 border-white"
+            className="w-12 h-12 rounded-full bg-brand-600 hover:bg-brand-700 text-white flex items-center justify-center shadow-lg shadow-brand-500/40 active:scale-95 transition-transform border-4 border-white dark:border-slate-900"
           >
             <Plus className="w-6 h-6 stroke-[2.5]" />
           </button>
@@ -50,7 +50,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenNewMovement }) => {
           to="/activity"
           className={({ isActive }) =>
             `flex flex-col items-center justify-center flex-1 py-1 text-xs font-medium transition-colors ${
-              isActive ? 'text-brand-600' : 'text-slate-400 hover:text-slate-600'
+              isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`
           }
         >
@@ -62,7 +62,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ onOpenNewMovement }) => {
           to="/profile"
           className={({ isActive }) =>
             `flex flex-col items-center justify-center flex-1 py-1 text-xs font-medium transition-colors ${
-              isActive ? 'text-brand-600' : 'text-slate-400 hover:text-slate-600'
+              isActive ? 'text-brand-600 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
             }`
           }
         >

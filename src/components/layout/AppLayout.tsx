@@ -60,7 +60,7 @@ export const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors">
       {/* Sidebar for Desktop */}
       <Sidebar
         currentUser={currentUser}

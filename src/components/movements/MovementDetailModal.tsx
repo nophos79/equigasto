@@ -49,9 +49,9 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Badge type={movement.type} />
             {group && (
@@ -62,7 +62,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
+            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400"
           >
             <X className="w-5 h-5" />
           </button>
@@ -169,7 +169,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
         </div>
 
         {/* Footer actions */}
-        <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <button
             onClick={handleDelete}
             className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-xl transition-colors"
@@ -185,7 +185,7 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
                   onEdit(movement);
                   onClose();
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-xs font-semibold shadow-sm transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-xs font-semibold shadow-sm transition-colors"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>Editar</span>
