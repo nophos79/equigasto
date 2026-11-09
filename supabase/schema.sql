@@ -43,7 +43,7 @@ create table if not exists public.group_members (
 create table if not exists public.movements (
   id uuid primary key default gen_random_uuid(),
   group_id uuid not null references public.groups(id) on delete cascade,
-  type text not null check (type in ('SHARED_EXPENSE', 'INDIVIDUAL_EXPENSE', 'LOAN', 'SETTLEMENT')),
+  type text not null check (type in ('SHARED_EXPENSE', 'INDIVIDUAL_EXPENSE', 'LOAN', 'SETTLEMENT', 'INCOME')),
   concept text not null,
   amount_cents integer not null check (amount_cents > 0),
   paid_by_id uuid not null references public.profiles(id) on delete cascade,

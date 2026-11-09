@@ -1,10 +1,11 @@
+export type SplitMode = 'EQUAL' | 'PERCENTAGE';
+
 export type MovementType = 
   | 'SHARED_EXPENSE'       // Gasto compartido entre varios/todos
   | 'INDIVIDUAL_EXPENSE'   // Adelanto 100% asumido por un miembro
   | 'LOAN'                 // Préstamo directo entre dos miembros
-  | 'SETTLEMENT';          // Devolución / liquidación de deuda
-
-export type SplitMode = 'EQUAL' | 'PERCENTAGE';
+  | 'SETTLEMENT'          // Devolución / liquidación de deuda
+  | 'INCOME';              // Ingreso personal (en grupos individuales)
 
 export interface UserProfile {
   id: string;
@@ -46,10 +47,10 @@ export interface Movement {
   paidById: string;      // Quien paga / presta / transfiere
   recipientId?: string;  // Quien recibe el préstamo, a quien se le adelanta o quien recibe liquidación
   splitMode?: SplitMode; // Para gastos compartidos ('EQUAL' | 'PERCENTAGE')
-  date: string;          // ISO Date string
+  date: string;          // ISO string
   createdAt: string;
-  shares: MovementShare[]; // Desglose de distribución económica en céntimos
   notes?: string;
+  shares: MovementShare[];
 }
 
 export interface MemberBalance {
@@ -61,6 +62,6 @@ export interface MemberBalance {
 
 export interface SimplifiedDebt {
   fromUserId: string; // Quien debe pagar
-  toUserId: string;   // Quien debe cobrar
-  amountCents: number;// Importe a liquidar
+  toUserId: string;   // Quien debe recibir el dinero
+  amountCents: number;
 }

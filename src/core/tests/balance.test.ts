@@ -90,3 +90,26 @@ test('calculateGroupBalances: Unificación de préstamo, gasto individual y liqu
   const sumNet = balances.reduce((sum, b) => sum + b.netBalanceCents, 0);
   assert.equal(sumNet, 0);
 });
+
+test('calculateGroupBalances: Ingreso personal (INCOME) no genera deudas con otros', () => {
+  const members = ['ana'];
+  const movements: Movement[] = [
+    {
+      id: 'mov-income',
+      groupId: 'grp-personal',
+      type: 'INCOME',
+      concept: 'Nómina',
+      amountCents: 200000,
+      paidById: 'ana',
+      date: '2026-05-10T20:00:00Z',
+      createdAt: '2026-05-10T20:00:00Z',
+      shares: [{ userId: 'ana', amountCents: 200000 }],
+    },
+  ];
+
+  const balances = calculateGroupBalances(members, movements);
+  const anaB = balances.find((b) => b.userId === 'ana')!;
+  assert.equal(anaB.netBalanceCents, 0);
+  assert.equal(anaB.paidCents, 0);
+  assert.equal(anaB.shouldPayCents, 0);
+});

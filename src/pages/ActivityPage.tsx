@@ -112,6 +112,7 @@ export const ActivityPage: React.FC = () => {
             <option value="INDIVIDUAL_EXPENSE">Adelantos individuales</option>
             <option value="LOAN">Préstamos</option>
             <option value="SETTLEMENT">Liquidaciones</option>
+            <option value="INCOME">Ingresos</option>
           </select>
 
           {/* Miembro */}

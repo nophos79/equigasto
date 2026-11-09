@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Users, UserCheck, ArrowRightLeft, CreditCard, Percent, AlertCircle, User } from 'lucide-react';
+import { X, Users, UserCheck, ArrowRightLeft, CreditCard, Percent, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { Group, MovementType, SplitMode, UserProfile, Movement, SimplifiedDebt } from '../../core/types';
 import { eurosToCents, centsToEuros, splitEqually, formatCurrency, formatPercentage } from '../../core/money';
 import { splitByPercentages } from '../../core/split';
@@ -146,6 +146,8 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
       }
     } else if (type === 'INDIVIDUAL_EXPENSE' || type === 'LOAN') {
       shares = [{ userId: recipientId, amountCents }];
+    } else if (type === 'INCOME') {
+      shares = [{ userId: paidById, amountCents }];
     }
 
     try {
@@ -157,7 +159,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           concept: concept.trim(),
           amountCents,
           paidById,
-          recipientId: type !== 'SHARED_EXPENSE' ? recipientId : undefined,
+          recipientId: (type === 'INDIVIDUAL_EXPENSE' || type === 'LOAN' || type === 'SETTLEMENT') ? recipientId : undefined,
           splitMode: type === 'SHARED_EXPENSE' ? splitMode : undefined,
           date: new Date(date).toISOString(),
           shares,
@@ -169,7 +171,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           concept: concept.trim(),
           amountCents,
           paidById,
-          recipientId: type !== 'SHARED_EXPENSE' ? recipientId : undefined,
+          recipientId: (type === 'INDIVIDUAL_EXPENSE' || type === 'LOAN' || type === 'SETTLEMENT') ? recipientId : undefined,
           splitMode: type === 'SHARED_EXPENSE' ? splitMode : undefined,
           date: new Date(date).toISOString(),
           shares,
@@ -208,9 +210,31 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
 
         {/* Tipo de movimiento selector */}
         {!isEditing && isSingleMemberGroup ? (
-          <div className="px-6 py-2.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center gap-2 text-xs font-semibold text-indigo-800">
-            <User className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span>Espacio de uso individual: gasto personal propio.</span>
+          <div className="p-3 bg-indigo-50/50 border-b border-indigo-100 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setType('SHARED_EXPENSE')}
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                type !== 'INCOME'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <TrendingDown className="w-4 h-4" />
+              <span>Gasto personal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setType('INCOME')}
+              className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
+                type === 'INCOME'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span>Ingreso</span>
+            </button>
           </div>
         ) : !isEditing && (
           <div className="p-4 bg-slate-50/70 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -312,7 +336,11 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             <input
               type="text"
               placeholder={
-                type === 'SHARED_EXPENSE'
+                type === 'INCOME'
+                  ? 'Ej: Nómina, transferencia, venta...'
+                  : isSingleMemberGroup
+                  ? 'Ej: Compra supermercado, farmacia, transporte...'
+                  : type === 'SHARED_EXPENSE'
                   ? 'Ej: Cena en restaurante, compra semanal'
                   : type === 'INDIVIDUAL_EXPENSE'
                   ? 'Ej: Billete de tren de Luis'
@@ -327,7 +355,8 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             />
           </div>
 
-          {/* Pagador y Receptor */}
+          {/* Pagador y Receptor (solo grupos compartidos) */}
+          {!isSingleMemberGroup && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">
@@ -376,11 +405,10 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             )}
           </div>
 
-          {/* Ajuste de porcentajes            )}
-          </div>
+          )}
 
-          {/* Reparto definido a nivel de grupo (solo lectura) */}
-          {type === 'SHARED_EXPENSE' && (
+          {/* Reparto definido a nivel de grupo (solo lectura para grupos compartidos) */}
+          {type === 'SHARED_EXPENSE' && !isSingleMemberGroup && (
             <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 text-xs">
               <p className="font-semibold text-slate-700 flex items-center gap-1">
                 <Percent className="w-3.5 h-3.5" />
@@ -469,7 +497,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               disabled={isSubmitting || (type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && !isPercentageValid)}
               className="flex-1 py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              {isSubmitting ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Registrar Movimiento'}
+              {isSubmitting ? 'Guardando...' : type === 'INCOME' ? 'Registrar Ingreso' : isEditing ? 'Guardar Cambios' : 'Registrar Gasto'}
             </button>
           </div>
         </form>

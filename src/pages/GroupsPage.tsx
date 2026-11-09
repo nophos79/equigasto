@@ -222,7 +222,7 @@ export const GroupsPage: React.FC = () => {
                     }`}
                   >
                     <Users className="w-4 h-4" />
-                    <span>Compartido (varios)</span>
+                    <span>Compartido</span>
                   </button>
                   <button
                     type="button"
@@ -239,7 +239,7 @@ export const GroupsPage: React.FC = () => {
                     }`}
                   >
                     <User className="w-4 h-4" />
-                    <span>Uso individual (1 persona)</span>
+                    <span>Individual</span>
                   </button>
                 </div>
               </div>

@@ -151,9 +151,6 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Cuadro de Gastos Personales (Uso individual) */}
-      <PersonalExpensesWidget groups={groups} movements={allMovements} />
-
       {/* Grupos Activos */}
       <div>
         <div className="flex items-center justify-between mb-3.5">
@@ -230,6 +227,9 @@ export const DashboardPage: React.FC = () => {
           })}
         </div>
       </div>
+
+      {/* Cuadro de Gastos Personales (Uso individual) */}
+      <PersonalExpensesWidget groups={groups} movements={allMovements} />
 
       {/* Actividad Reciente */}
       <div>

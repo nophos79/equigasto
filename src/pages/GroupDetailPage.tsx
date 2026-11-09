@@ -334,7 +334,7 @@ export const GroupDetailPage: React.FC = () => {
               <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" /> Tipo:
               </span>
-              {['ALL', 'SHARED_EXPENSE', 'INDIVIDUAL_EXPENSE', 'LOAN', 'SETTLEMENT'].map((t) => (
+              {(group.members.length === 1 ? ['ALL', 'SHARED_EXPENSE', 'INCOME'] : ['ALL', 'SHARED_EXPENSE', 'INDIVIDUAL_EXPENSE', 'LOAN', 'SETTLEMENT']).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTypeFilter(t)}
@@ -347,16 +347,17 @@ export const GroupDetailPage: React.FC = () => {
                   {t === 'ALL'
                     ? 'Todos'
                     : t === 'SHARED_EXPENSE'
-                    ? 'Compartidos'
+                    ? (group.members.length === 1 ? 'Gastos' : 'Compartidos')
                     : t === 'INDIVIDUAL_EXPENSE'
                     ? 'Adelantos'
                     : t === 'LOAN'
                     ? 'Préstamos'
-                    : 'Liquidaciones'}
+                    : t === 'SETTLEMENT' ? 'Liquidaciones' : 'Ingresos'}
                 </button>
               ))}
             </div>
 
+            {group.members.length > 1 && (
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-xs text-slate-400 font-medium">Miembro:</span>
               <select
@@ -375,6 +376,7 @@ export const GroupDetailPage: React.FC = () => {
                 })}
               </select>
             </div>
+            )}
           </div>
 
           <Card className="divide-y divide-slate-100 p-0 overflow-hidden">

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Wallet, PlusCircle, ArrowUpRight } from 'lucide-react';
+import { User, Wallet, PlusCircle, ArrowUpRight, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { Card } from '../common/Card';
 import { formatCurrency } from '../../core/money';
 import type { Group, Movement } from '../../core/types';
@@ -8,7 +8,6 @@ import type { Group, Movement } from '../../core/types';
 interface PersonalExpensesWidgetProps {
   groups: Group[];
   movements: Movement[];
-  onOpenCreateGroup?: () => void;
 }
 
 type PeriodFilter = 'month' | 'year' | 'all';
@@ -56,26 +55,42 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
     });
   }, [personalMovements, period]);
 
-  // Cálculos estadísticos
-  const totalCents = useMemo(
-    () => filteredMovements.reduce((acc, m) => acc + m.amountCents, 0),
+  // Cálculos financieros: Ingresos, Gastos y Balance neto
+  const totalIncomeCents = useMemo(
+    () =>
+      filteredMovements
+        .filter((m) => m.type === 'INCOME')
+        .reduce((acc, m) => acc + m.amountCents, 0),
     [filteredMovements]
   );
 
-  const averageCents = useMemo(
-    () => (filteredMovements.length > 0 ? Math.round(totalCents / filteredMovements.length) : 0),
-    [totalCents, filteredMovements.length]
+  const totalExpenseCents = useMemo(
+    () =>
+      filteredMovements
+        .filter((m) => m.type !== 'INCOME')
+        .reduce((acc, m) => acc + m.amountCents, 0),
+    [filteredMovements]
   );
+
+  const netBalanceCents = totalIncomeCents - totalExpenseCents;
 
   // Desglose por grupo en el período
   const breakdownByGroup = useMemo(() => {
     return personalGroups.map((grp) => {
       const groupMovs = filteredMovements.filter((m) => m.groupId === grp.id);
-      const groupTotal = groupMovs.reduce((acc, m) => acc + m.amountCents, 0);
+      const groupIncomes = groupMovs
+        .filter((m) => m.type === 'INCOME')
+        .reduce((acc, m) => acc + m.amountCents, 0);
+      const groupExpenses = groupMovs
+        .filter((m) => m.type !== 'INCOME')
+        .reduce((acc, m) => acc + m.amountCents, 0);
+
       return {
         group: grp,
         count: groupMovs.length,
-        totalCents: groupTotal,
+        incomes: groupIncomes,
+        expenses: groupExpenses,
+        net: groupIncomes - groupExpenses,
       };
     });
   }, [personalGroups, filteredMovements]);
@@ -90,9 +105,9 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
               <User className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Control de Gastos Personales (Uso individual)</h3>
+              <h3 className="text-sm font-bold text-slate-900">Control de Finanzas Personales</h3>
               <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                ¿Quieres registrar tus presupuestos y gastos propios sin mezclarlos con deudas compartidas? Puedes crear un <strong>Espacio individual (1 persona)</strong> desde Mis Grupos.
+                ¿Quieres registrar ingresos y gastos propios sin mezclarlos con deudas compartidas? Puedes crear un <strong>Espacio individual</strong> desde Mis Grupos.
               </p>
             </div>
           </div>
@@ -124,13 +139,13 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900">Control de Gastos Personales</h3>
+              <h3 className="text-sm font-bold text-slate-900">Control de Finanzas Personales</h3>
               <span className="text-[11px] font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">
-                Uso individual
+                Individual
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Gastos propios asumidos al 100% por ti (no generan deudas con otros).
+              Ingresos y gastos propios asumidos al 100% por ti (no generan deudas con otros).
             </p>
           </div>
         </div>
@@ -154,40 +169,56 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
         </div>
       </div>
 
-      {/* Métricas del período */}
+      {/* Métricas del período: Ingresos, Gastos y Balance */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100/70">
-          <span className="text-xs font-semibold text-indigo-800">Total gastado ({periodLabels[period]})</span>
-          <p className="text-2xl font-black text-indigo-900 mt-1">
-            {formatCurrency(totalCents)}
+        {/* Total Ingresos */}
+        <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-100">
+          <div className="flex items-center justify-between text-xs font-semibold text-emerald-800">
+            <span>Ingresos ({periodLabels[period]})</span>
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <p className="text-2xl font-black text-emerald-700 mt-1">
+            {formatCurrency(totalIncomeCents)}
+          </p>
+          <span className="text-[11px] text-emerald-600 font-medium">Entradas registradas</span>
+        </div>
+
+        {/* Total Gastos */}
+        <div className="p-3.5 bg-rose-50/70 rounded-2xl border border-rose-100">
+          <div className="flex items-center justify-between text-xs font-semibold text-rose-800">
+            <span>Gastos ({periodLabels[period]})</span>
+            <TrendingDown className="w-3.5 h-3.5 text-rose-600" />
+          </div>
+          <p className="text-2xl font-black text-rose-700 mt-1">
+            {formatCurrency(totalExpenseCents)}
+          </p>
+          <span className="text-[11px] text-rose-600 font-medium">Salidas y compras</span>
+        </div>
+
+        {/* Balance / Ahorro Neto */}
+        <div className="p-3.5 bg-indigo-50/60 rounded-2xl border border-indigo-100">
+          <div className="flex items-center justify-between text-xs font-semibold text-indigo-800">
+            <span>Balance neto ({periodLabels[period]})</span>
+            <Scale className="w-3.5 h-3.5 text-indigo-600" />
+          </div>
+          <p
+            className={`text-2xl font-black mt-1 ${
+              netBalanceCents >= 0 ? 'text-indigo-900' : 'text-rose-700'
+            }`}
+          >
+            {formatCurrency(netBalanceCents, { showSign: true })}
           </p>
           <span className="text-[11px] text-indigo-600 font-medium">
-            {filteredMovements.length} {filteredMovements.length === 1 ? 'gasto registrado' : 'gastos registrados'}
+            {netBalanceCents >= 0 ? 'Ahorro positivo' : 'Gastos superiores a ingresos'}
           </span>
-        </div>
-
-        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/70">
-          <span className="text-xs font-semibold text-slate-600">Media por gasto</span>
-          <p className="text-2xl font-black text-slate-800 mt-1">
-            {formatCurrency(averageCents)}
-          </p>
-          <span className="text-[11px] text-slate-400 font-medium">Promedio en el período</span>
-        </div>
-
-        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/70">
-          <span className="text-xs font-semibold text-slate-600">Espacios individuales</span>
-          <p className="text-2xl font-black text-slate-800 mt-1">
-            {personalGroups.length}
-          </p>
-          <span className="text-[11px] text-slate-400 font-medium">Grupos de 1 persona</span>
         </div>
       </div>
 
       {/* Desglose por grupo individual */}
-      <div className="pt-2">
+      <div className="pt-1">
         <span className="text-xs font-semibold text-slate-600 block mb-2">Desglose por espacio:</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {breakdownByGroup.map(({ group, count, totalCents: grpCents }) => (
+          {breakdownByGroup.map(({ group, count, incomes, expenses }) => (
             <Link
               key={group.id}
               to={`/groups/${group.id}`}
@@ -202,14 +233,21 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
                     {group.name}
                   </p>
                   <p className="text-[10px] text-slate-400">
-                    {count} {count === 1 ? 'registro' : 'registros'}
+                    {count} {count === 1 ? 'movimiento' : 'movimientos'}
                   </p>
                 </div>
               </div>
               <div className="text-right shrink-0 flex items-center gap-1.5 pl-2">
-                <span className="text-xs font-extrabold text-slate-900">
-                  {formatCurrency(grpCents)}
-                </span>
+                <div className="text-right">
+                  {incomes > 0 && (
+                    <span className="text-[10px] font-bold text-emerald-600 block">
+                      +{formatCurrency(incomes)}
+                    </span>
+                  )}
+                  <span className="text-xs font-extrabold text-slate-900 block">
+                    {expenses > 0 ? `-${formatCurrency(expenses)}` : '0,00 €'}
+                  </span>
+                </div>
                 <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600" />
               </div>
             </Link>

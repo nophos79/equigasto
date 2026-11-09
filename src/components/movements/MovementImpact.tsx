@@ -11,6 +11,11 @@ interface MovementImpactProps {
 /** Cuánto te deben o debes por un movimiento concreto. */
 export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId }) => {
   if (!userId) return null;
+
+  if (movement.type === 'INCOME') {
+    return <span className="text-xs text-emerald-600 font-semibold">+ {formatCurrency(movement.amountCents)} (Ingreso)</span>;
+  }
+
   const net = calculateMovementImpact(movement, userId);
 
   if (net === 0) {
@@ -20,7 +25,7 @@ export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId
       movement.paidById === userId;
 
     if (isPersonal) {
-      return <span className="text-xs text-indigo-600 font-semibold">Gasto personal</span>;
+      return <span className="text-xs text-slate-500 font-semibold">Gasto personal</span>;
     }
     return <span className="text-xs text-slate-400 font-medium">Sin saldo pendiente</span>;
   }
