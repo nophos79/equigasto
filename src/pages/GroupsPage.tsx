@@ -133,16 +133,16 @@ export const GroupsPage: React.FC = () => {
               <Card hoverable className="h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-start justify-between mb-4">
-                    <span className="text-4xl p-2 bg-slate-50 rounded-2xl border border-slate-100">
+                    <span className="text-4xl p-2 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                       {group.icon}
                     </span>
                     {isIndividual ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full flex items-center gap-1 border border-indigo-100">
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/50">
                         <User className="w-3 h-3" />
                         Uso individual
                       </span>
                     ) : (
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full flex items-center gap-1">
+                      <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         {group.members.length} miembros
                       </span>
@@ -162,12 +162,12 @@ export const GroupsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <span className="text-xs text-slate-400 font-medium">
                     {isIndividual ? 'Tipo de espacio' : 'Tu saldo neto'}
                   </span>
                   {isIndividual ? (
-                    <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
+                    <span className="text-xs font-bold text-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300">
                       Personal (sin deudas)
                     </span>
                   ) : (
@@ -195,7 +195,7 @@ export const GroupsPage: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">Crear Nuevo Grupo</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Crear Nuevo Grupo</h2>
               <button
                 onClick={() => setIsCreateModalOpen(false)}
                 className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400"
@@ -254,8 +254,8 @@ export const GroupsPage: React.FC = () => {
                       onClick={() => setNewGroupIcon(emoji)}
                       className={`text-xl p-2.5 rounded-xl border transition-all ${
                         newGroupIcon === emoji
-                          ? 'border-brand-500 bg-brand-50 scale-105'
-                          : 'border-slate-200 hover:bg-slate-50'
+                          ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/60 scale-105'
+                          : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/60'
                       }`}
                     >
                       {emoji}
@@ -302,15 +302,15 @@ export const GroupsPage: React.FC = () => {
                   </div>
 
                   {/* Añadir miembros iniciales */}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                      <label className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
                         <UserPlus className="w-3.5 h-3.5" /> Añadir miembros (correo de usuarios registrados):
                       </label>
                       <button
                         type="button"
                         onClick={handleAddInvitedField}
-                        className="text-xs text-brand-600 font-semibold hover:text-brand-700"
+                        className="text-xs text-brand-600 dark:text-brand-400 font-semibold hover:text-brand-700 dark:hover:text-brand-300"
                       >
                         + Añadir otro
                       </button>
@@ -323,7 +323,7 @@ export const GroupsPage: React.FC = () => {
                             placeholder={`correo${idx + 1}@ejemplo.com`}
                             value={name}
                             onChange={(e) => handleInvitedNameChange(idx, e.target.value)}
-                            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                            className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
                           />
                           {initialInvitedNames.length > 1 && (
                             <button
@@ -340,12 +340,12 @@ export const GroupsPage: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-xs text-indigo-800 space-y-1">
+                <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 rounded-2xl text-xs text-indigo-800 dark:text-indigo-200 space-y-1">
                   <p className="font-bold flex items-center gap-1.5">
                     <User className="w-4 h-4 text-indigo-600" />
                     Grupo individual para tus finanzas privadas
                   </p>
-                  <p className="text-indigo-600 text-[11px] leading-relaxed">
+                  <p className="text-indigo-600 dark:text-indigo-400 text-[11px] leading-relaxed">
                     Tus gastos aquí no se mezclan con deudas de amigos ni viajes compartidos.
                   </p>
                 </div>

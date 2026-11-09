@@ -620,7 +620,7 @@ export const GroupDetailPage: React.FC = () => {
           {/* Formulario de Configuración Básica y Reparto */}
           <form onSubmit={handleSaveConfig}>
             <Card className="space-y-4">
-              <h3 className="text-base font-bold text-slate-900">Configuración del Grupo</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Configuración del Grupo</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -730,7 +730,7 @@ export const GroupDetailPage: React.FC = () => {
                                   [m.userId]: clamped,
                                 }));
                               }}
-                              className="w-24 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-right font-bold text-slate-800 focus:ring-1 focus:ring-brand-500"
+                              className="w-24 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-800 dark:text-white focus:ring-1 focus:ring-brand-500"
                             />
                             <span className="text-slate-400 font-bold">%</span>
                           </div>
@@ -757,7 +757,7 @@ export const GroupDetailPage: React.FC = () => {
           {/* Añadir miembro por correo (usuario registrado y verificado) */}
           <Card className="space-y-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-brand-600" />
                 <span>Añadir miembro</span>
               </h3>
@@ -773,11 +773,11 @@ export const GroupDetailPage: React.FC = () => {
                 required
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold whitespace-nowrap"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-brand-600 dark:hover:bg-brand-700 text-white rounded-xl text-xs font-semibold whitespace-nowrap"
               >
                 Añadir al grupo
               </button>
