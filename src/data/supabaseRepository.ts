@@ -3,38 +3,33 @@ import type { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from
 import { supabase } from './supabaseClient.ts';
 import { calculateGroupBalances } from '../core/balance.ts';
 import { simplifyDebts } from '../core/simplify.ts';
-import { CURRENT_USER } from './mockData.ts';
 
 export class SupabaseRepository implements IDataRepository {
   async getCurrentUser(): Promise<UserProfile> {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      // Si no ha iniciado sesión con Supabase Auth todavía, devolvemos el perfil por defecto
-      return CURRENT_USER;
-    }
+    if (!user) throw new Error('No hay sesión activa.');
 
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('auth_user_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (profile) {
-      return {
-        id: profile.id,
-        name: profile.name,
-        email: profile.email,
-        avatarUrl: profile.avatar_url,
-        isProvisional: profile.is_provisional,
-      };
-    }
+    if (error) throw new Error('No se pudo leer tu perfil: ' + error.message);
+    if (!profile) throw new Error('Tu perfil no existe en la base de datos.');
 
-    return CURRENT_USER;
+    return {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      avatarUrl: profile.avatar_url,
+      isProvisional: profile.is_provisional,
+    };
   }
 
   async getUsers(): Promise<UserProfile[]> {
     const { data, error } = await supabase.from('profiles').select('*');
-    if (error || !data) return [CURRENT_USER];
+    if (error || !data) return [];
 
     return data.map((p) => ({
       id: p.id,

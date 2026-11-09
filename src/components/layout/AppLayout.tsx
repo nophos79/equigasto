@@ -12,13 +12,19 @@ export const AppLayout: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [isNewMovementOpen, setIsNewMovementOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
-      const user = await repository.getCurrentUser();
-      const allGroups = await repository.getGroups();
-      setCurrentUser(user);
-      setGroups(allGroups);
+      try {
+        const user = await repository.getCurrentUser();
+        const allGroups = await repository.getGroups();
+        setCurrentUser(user);
+        setGroups(allGroups);
+        setLoadError(null);
+      } catch (e) {
+        setLoadError(e instanceof Error ? e.message : 'Error desconocido');
+      }
     }
     loadData();
   }, [refreshTrigger]);
@@ -27,6 +33,23 @@ export const AppLayout: React.FC = () => {
     setIsNewMovementOpen(false);
     setRefreshTrigger(prev => prev + 1);
   };
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
+        <div className="max-w-sm bg-white rounded-2xl border border-rose-200 p-6 text-center space-y-3">
+          <p className="text-sm font-bold text-rose-700">No se pudieron cargar tus datos</p>
+          <p className="text-xs text-slate-500 break-words">{loadError}</p>
+          <button
+            onClick={() => setRefreshTrigger((p) => p + 1)}
+            className="px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-semibold"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (

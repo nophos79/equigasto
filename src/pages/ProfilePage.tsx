@@ -5,7 +5,11 @@ import { UserProfile } from '../core/types';
 import { Card } from '../components/common/Card';
 import { Avatar } from '../components/common/Avatar';
 
-export const ProfilePage: React.FC = () => {
+interface ProfilePageProps {
+  onSignOut: () => Promise<void>;
+}
+
+export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [provisionalLinked, setProvisionalLinked] = useState(false);
 
@@ -109,7 +113,7 @@ export const ProfilePage: React.FC = () => {
       {/* Cerrar Sesión */}
       <div className="pt-2">
         <button
-          onClick={() => alert('Sesión simulada. En Fase 4 se conectará con Supabase Auth.')}
+          onClick={() => { void onSignOut(); }}
           className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-2xl text-sm font-semibold transition-colors"
         >
           <LogOut className="w-4 h-4" />
