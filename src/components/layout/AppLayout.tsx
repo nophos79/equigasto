@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 import { BottomNav } from './BottomNav';
-import { repository } from '../../data/mockRepository';
+import { repository } from '../../data/index';
 import { UserProfile, Group, Movement } from '../../core/types';
 import { NewMovementModal } from '../movements/NewMovementModal';
 

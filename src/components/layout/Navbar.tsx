@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Bell } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { UserProfile } from '../../core/types';
 import { Avatar } from '../common/Avatar';
+import { NotificationsBell } from './NotificationsBell';
 
 interface NavbarProps {
   currentUser: UserProfile;
@@ -34,14 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onOpenNewMovement }
             <span>Añadir gasto</span>
           </button>
 
-          <button
-            type="button"
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-xl transition-colors relative"
-            title="Notificaciones"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-600 rounded-full" />
-          </button>
+          <NotificationsBell currentUserId={currentUser.id} />
 
           <Link to="/profile" className="flex items-center gap-2 pl-1 group">
             <Avatar name={currentUser.name} url={currentUser.avatarUrl} size="sm" />

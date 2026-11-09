@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Search, ArrowUpDown } from 'lucide-react';
-import { repository } from '../data/mockRepository';
+import { repository } from '../data/index';
+import { MovementImpact } from '../components/movements/MovementImpact';
 import { Movement, Group, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
@@ -162,7 +163,6 @@ export const ActivityPage: React.FC = () => {
                     name={payer?.name || 'Usuario'}
                     url={payer?.avatarUrl}
                     size="md"
-                    isProvisional={payer?.isProvisional}
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -183,7 +183,7 @@ export const ActivityPage: React.FC = () => {
                   <p className="text-sm sm:text-base font-extrabold text-slate-900">
                     {formatCurrency(mov.amountCents)}
                   </p>
-                  <span className="text-xs text-brand-600 font-medium">Ver detalle</span>
+                  <MovementImpact movement={mov} userId={currentUser?.id} />
                 </div>
               </div>
             );
@@ -209,7 +209,7 @@ export const ActivityPage: React.FC = () => {
       {movementToEdit && (
         <NewMovementModal
           groups={groups}
-          currentUser={currentUser || { id: 'user-1', name: 'Usuario', email: null, isProvisional: false }}
+          currentUser={currentUser || { id: 'user-1', name: 'Usuario', email: null }}
           movementToEdit={movementToEdit}
           onClose={() => setMovementToEdit(null)}
           onCreated={() => {

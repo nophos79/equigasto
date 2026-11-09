@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import { Plus, Users, X, UserPlus, Trash2 } from 'lucide-react';
-import { repository } from '../data/mockRepository';
+import { repository } from '../data/index';
 import { Group, SplitMode, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';

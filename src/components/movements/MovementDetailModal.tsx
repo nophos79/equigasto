@@ -4,7 +4,7 @@ import { Movement, UserProfile, Group } from '../../core/types';
 import { formatCurrency } from '../../core/money';
 import { Badge } from '../common/Badge';
 import { Avatar } from '../common/Avatar';
-import { repository } from '../../data/mockRepository';
+import { repository } from '../../data/index';
 
 interface MovementDetailModalProps {
   movement: Movement;
@@ -89,7 +89,6 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
                 name={payer?.name || 'Usuario'}
                 url={payer?.avatarUrl}
                 size="sm"
-                isProvisional={payer?.isProvisional}
               />
               <div>
                 <p className="text-xs text-slate-400 font-medium">
@@ -115,7 +114,6 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
                   name={recipient.name}
                   url={recipient.avatarUrl}
                   size="sm"
-                  isProvisional={recipient.isProvisional}
                 />
                 <div>
                   <p className="text-xs text-slate-400 font-medium">
@@ -153,7 +151,6 @@ export const MovementDetailModal: React.FC<MovementDetailModalProps> = ({
                           name={shareUser?.name || 'Usuario'}
                           url={shareUser?.avatarUrl}
                           size="sm"
-                          isProvisional={shareUser?.isProvisional}
                         />
                         <span className="font-medium text-slate-800">{shareUser?.name}</span>
                         {share.percentage && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Smartphone, Globe, LogOut, CheckCircle2 } from 'lucide-react';
-import { repository } from '../data/mockRepository';
+import { repository } from '../data/index';
 import { UserProfile } from '../core/types';
 import { Card } from '../components/common/Card';
 import { Avatar } from '../components/common/Avatar';

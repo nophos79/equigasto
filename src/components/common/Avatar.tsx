@@ -4,10 +4,9 @@ interface AvatarProps {
   name: string;
   url?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  isProvisional?: boolean;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ name, url, size = 'md', isProvisional }) => {
+export const Avatar: React.FC<AvatarProps> = ({ name, url, size = 'md' }) => {
   const sizeClasses = {
     sm: 'w-7 h-7 text-xs',
     md: 'w-9 h-9 text-sm',
@@ -35,12 +34,6 @@ export const Avatar: React.FC<AvatarProps> = ({ name, url, size = 'md', isProvis
         >
           {getInitials(name)}
         </div>
-      )}
-      {isProvisional && (
-        <span
-          title="Participante provisional"
-          className="absolute -bottom-0.5 -right-0.5 bg-amber-500 border-2 border-white w-3 h-3 rounded-full"
-        />
       )}
     </div>
   );

@@ -8,7 +8,8 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
-import { repository } from '../data/mockRepository';
+import { repository } from '../data/index';
+import { MovementImpact } from '../components/movements/MovementImpact';
 import { Group, Movement, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
@@ -244,7 +245,6 @@ export const DashboardPage: React.FC = () => {
                       name={payer?.name || 'Usuario'}
                       url={payer?.avatarUrl}
                       size="md"
-                      isProvisional={payer?.isProvisional}
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -265,7 +265,7 @@ export const DashboardPage: React.FC = () => {
                     <p className="text-sm sm:text-base font-extrabold text-slate-900">
                       {formatCurrency(mov.amountCents)}
                     </p>
-                    <span className="text-xs text-brand-600 font-medium">Ver desglose</span>
+                    <MovementImpact movement={mov} userId={currentUser?.id} />
                   </div>
                 </div>
               );

@@ -11,7 +11,6 @@ export interface UserProfile {
   name: string;
   email: string | null;
   avatarUrl?: string;
-  isProvisional: boolean; // Participante provisional sin cuenta registrada todavía
 }
 
 export interface GroupMemberConfig {

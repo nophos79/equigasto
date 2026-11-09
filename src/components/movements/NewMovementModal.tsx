@@ -4,7 +4,7 @@ import { Group, MovementType, SplitMode, UserProfile, Movement, SimplifiedDebt }
 import { eurosToCents, centsToEuros, splitEqually, formatCurrency } from '../../core/money';
 import { splitByPercentages } from '../../core/split';
 import { validateSettlement } from '../../core/settlement';
-import { repository } from '../../data/mockRepository';
+import { repository } from '../../data/index';
 
 interface NewMovementModalProps {
   groups: Group[];
@@ -62,10 +62,6 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   const [recipientId, setRecipientId] = useState(
     movementToEdit?.recipientId || initialRecipientId || ''
   );
-  const [splitMode, setSplitMode] = useState<SplitMode>(
-    movementToEdit?.splitMode || 'EQUAL'
-  );
-  const [customPercentages, setCustomPercentages] = useState<Record<string, number>>({});
   const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
   const [groupDebts, setGroupDebts] = useState<SimplifiedDebt[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,18 +77,11 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   }, [selectedGroupId]);
 
   const currentGroup = groups.find((g) => g.id === selectedGroupId) || groups[0];
+  // El modo de reparto se define a nivel de grupo (Configuración del grupo)
+  const splitMode: SplitMode = currentGroup?.defaultSplitMode ?? 'EQUAL';
 
   useEffect(() => {
     if (currentGroup && !isEditing) {
-      if (!initialType) {
-        setSplitMode(currentGroup.defaultSplitMode);
-      }
-      // Inicializar porcentajes según la config del grupo
-      const pMap: Record<string, number> = {};
-      currentGroup.members.forEach((m) => {
-        pMap[m.userId] = m.percentage;
-      });
-      setCustomPercentages(pMap);
 
       if (!initialRecipientId) {
         const otherMember = currentGroup.members.find((m) => m.userId !== paidById);
@@ -109,13 +98,12 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
         return {
           ...m,
           name: u ? u.name : 'Usuario',
-          isProvisional: u?.isProvisional,
         };
       })
     : [];
 
   // Calcular la suma actual de porcentajes cuando se está en modo porcentaje
-  const totalPercentageSum = Object.values(customPercentages).reduce((acc, p) => acc + (p || 0), 0);
+  const totalPercentageSum = groupMembers.reduce((acc, m) => acc + (m.percentage || 0), 0);
   const isPercentageValid = Math.abs(totalPercentageSum - 100) < 0.05;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +119,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
     }
 
     if (type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && !isPercentageValid) {
-      alert(`La suma de los porcentajes debe ser exactamente el 100% (actualmente: ${totalPercentageSum.toFixed(2)}%)`);
+      alert(`Los porcentajes del grupo suman ${totalPercentageSum.toFixed(2)}%. Corrígelos en Configuración del grupo para poder repartir.`);
       return;
     }
 
@@ -151,7 +139,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
         // Porcentual determinista con Resto Mayor (Hare-Niemeyer)
         const pctConfigs = groupMembers.map((m) => ({
           userId: m.userId,
-          percentage: customPercentages[m.userId] ?? m.percentage,
+          percentage: m.percentage,
         }));
         shares = splitByPercentages(amountCents, pctConfigs);
       }
@@ -356,7 +344,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               </select>
             </div>
 
-            {type !== 'SHARED_EXPENSE' ? (
+            {type !== 'SHARED_EXPENSE' && (
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">
                   {type === 'LOAN'
@@ -379,72 +367,45 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                     ))}
                 </select>
               </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  Modalidad de reparto
-                </label>
-                <select
-                  value={splitMode}
-                  onChange={(e) => setSplitMode(e.target.value as SplitMode)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                >
-                  <option value="EQUAL">Partes iguales (Equitativo)</option>
-                  <option value="PERCENTAGE">Porcentajes personalizados</option>
-                </select>
-              </div>
             )}
           </div>
 
-          {/* Ajuste de porcentajes si se selecciona modo porcentual */}
-          {type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && (
-            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-700 flex items-center gap-1">
-                  <Percent className="w-3.5 h-3.5" /> Ajuste porcentual del gasto:
-                </span>
-                <span
-                  className={`font-bold ${
-                    isPercentageValid ? 'text-emerald-600' : 'text-rose-600'
-                  }`}
-                >
-                  Suma: {totalPercentageSum.toFixed(1)}% {isPercentageValid ? '✓' : '(Debe ser 100%)'}
-                </span>
-              </div>
+          {/* Ajuste de porcentajes            )}
+          </div>
 
-              <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                {groupMembers.map((m) => (
-                  <div key={m.userId} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="truncate text-slate-600">{m.name}</span>
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        value={customPercentages[m.userId] ?? m.percentage}
-                        onChange={(e) =>
-                          setCustomPercentages((prev) => ({
-                            ...prev,
-                            [m.userId]: parseFloat(e.target.value) || 0,
-                          }))
-                        }
-                        className="w-16 px-2 py-1 bg-white border border-slate-200 rounded-lg text-right font-medium focus:ring-1 focus:ring-brand-500"
-                      />
-                      <span className="text-slate-400">%</span>
+          {/* Reparto definido a nivel de grupo (solo lectura) */}
+          {type === 'SHARED_EXPENSE' && (
+            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2 text-xs">
+              <p className="font-semibold text-slate-700 flex items-center gap-1">
+                <Percent className="w-3.5 h-3.5" />
+                {splitMode === 'EQUAL'
+                  ? 'Reparto a partes iguales (configuración del grupo)'
+                  : 'Reparto porcentual (configuración del grupo)'}
+              </p>
+
+              {splitMode === 'EQUAL' ? (
+                <p className="text-slate-500">
+                  {groupMembers.map((m) => m.name).join(', ')} ({groupMembers.length} personas)
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {groupMembers.map((m) => (
+                    <div key={m.userId} className="flex items-center justify-between text-slate-600">
+                      <span className="truncate">{m.name}</span>
+                      <span className="font-medium">{m.percentage}%</span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {!isPercentageValid && (
+              {splitMode === 'PERCENTAGE' && !isPercentageValid && (
                 <p className="text-[11px] text-rose-600 flex items-center gap-1">
-                  <AlertCircle className="w-3.5 h-3.5" /> La suma de los porcentajes debe ser exactamente 100%.
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Los porcentajes del grupo suman {totalPercentageSum.toFixed(2)}%. Corrígelos en la configuración del grupo.
                 </p>
               )}
             </div>
           )}
-
           {/* Aviso inteligente de liquidación / deuda inversa */}
           {type === 'SETTLEMENT' && amountInput && (
             (() => {
@@ -487,14 +448,6 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
             />
           </div>
-
-          {/* Info de participantes incluidos en reparto igualitario */}
-          {type === 'SHARED_EXPENSE' && splitMode === 'EQUAL' && (
-            <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">Participantes: </span>
-              {groupMembers.map((m) => m.name).join(', ')} ({groupMembers.length} personas)
-            </div>
-          )}
 
           {/* Botones de acción */}
           <div className="pt-2 flex gap-3">

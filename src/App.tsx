@@ -15,6 +15,19 @@ import { isSupabaseConfigured } from './data/supabaseClient';
 export const App: React.FC = () => {
   const { session, loading, busy, error, signIn, signUp, resend, signOut, clearError } = useAuth();
 
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-sm bg-white rounded-2xl border border-amber-200 p-6 text-center space-y-2">
+          <p className="text-sm font-bold text-amber-700">Falta configurar Supabase</p>
+          <p className="text-xs text-slate-500">
+            Define VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en el archivo .env.local (o en las variables de entorno del despliegue) y reinicia.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Esperando a que Supabase resuelva la sesión inicial
   if (loading) {
     return (

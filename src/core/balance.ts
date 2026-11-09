@@ -73,3 +73,24 @@ export function calculateGroupBalances(memberUserIds: string[], movements: Movem
 
   return balances;
 }
+
+
+/**
+ * Impacto neto de UN movimiento para un usuario, en céntimos:
+ * > 0 le deben ese importe, < 0 debe ese importe, 0 no le afecta.
+ * Misma lógica que calculateGroupBalances: adelantado - asumido.
+ */
+export function calculateMovementImpact(mov: Movement, userId: string): number {
+  const paid = mov.paidById === userId ? mov.amountCents : 0;
+  let assumed = 0;
+
+  if (mov.type === 'SHARED_EXPENSE') {
+    assumed = mov.shares
+      .filter((s) => s.userId === userId)
+      .reduce((acc, s) => acc + s.amountCents, 0);
+  } else if (mov.recipientId === userId) {
+    assumed = mov.amountCents;
+  }
+
+  return paid - assumed;
+}

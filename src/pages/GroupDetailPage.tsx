@@ -10,7 +10,8 @@ import {
   Save,
   Percent,
 } from 'lucide-react';
-import { repository } from '../data/mockRepository';
+import { repository } from '../data/index';
+import { MovementImpact } from '../components/movements/MovementImpact';
 import { useRealtime } from '../hooks/useRealtime';
 import { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt, SplitMode } from '../core/types';
 import { formatCurrency } from '../core/money';
@@ -396,7 +397,6 @@ export const GroupDetailPage: React.FC = () => {
                         name={payer?.name || 'Usuario'}
                         url={payer?.avatarUrl}
                         size="md"
-                        isProvisional={payer?.isProvisional}
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -414,7 +414,7 @@ export const GroupDetailPage: React.FC = () => {
                       <p className="text-sm sm:text-base font-extrabold text-slate-900">
                         {formatCurrency(mov.amountCents)}
                       </p>
-                      <span className="text-xs text-brand-600 font-medium">Ver desglose</span>
+                      <MovementImpact movement={mov} userId={currentUser?.id} />
                     </div>
                   </div>
                 );
@@ -448,14 +448,13 @@ export const GroupDetailPage: React.FC = () => {
                         name={u?.name || 'Usuario'}
                         url={u?.avatarUrl}
                         size="md"
-                        isProvisional={u?.isProvisional}
                       />
                       <div>
                         <p className="text-sm font-bold text-slate-900">
                           {u?.name} {u?.id === currentUser.id ? '(Tú)' : ''}
                         </p>
                         <p className="text-xs text-slate-400">
-                          {u?.isProvisional ? 'Participante provisional (sin cuenta)' : u?.email}
+                          {u?.email}
                         </p>
                       </div>
                     </div>
@@ -521,7 +520,6 @@ export const GroupDetailPage: React.FC = () => {
                         name={fromUser?.name || 'U'}
                         url={fromUser?.avatarUrl}
                         size="sm"
-                        isProvisional={fromUser?.isProvisional}
                       />
                       <span className="font-bold text-slate-800 text-sm">
                         {fromUser?.name} {isFromMe ? '(Tú)' : ''}
@@ -531,7 +529,6 @@ export const GroupDetailPage: React.FC = () => {
                         name={toUser?.name || 'U'}
                         url={toUser?.avatarUrl}
                         size="sm"
-                        isProvisional={toUser?.isProvisional}
                       />
                       <span className="font-bold text-slate-800 text-sm">
                         {toUser?.name} {isToMe ? '(Tú)' : ''}
@@ -695,7 +692,6 @@ export const GroupDetailPage: React.FC = () => {
                               name={u?.name || 'U'}
                               url={u?.avatarUrl}
                               size="sm"
-                              isProvisional={u?.isProvisional}
                             />
                             <span className="font-medium text-slate-800">{u?.name}</span>
                           </div>
@@ -766,7 +762,8 @@ export const GroupDetailPage: React.FC = () => {
             </form>
           </Card>
 
-          {/* Zona de peligro */}
+          {/* Zona de peligro (solo el creador del grupo) */}
+          {currentUser.id === group.createdBy && (
           <Card className="space-y-3 border-rose-200">
             <div>
               <h3 className="text-base font-bold text-rose-700">Zona de peligro</h3>
@@ -783,6 +780,7 @@ export const GroupDetailPage: React.FC = () => {
               {isDeletingGroup ? 'Eliminando...' : 'Eliminar grupo'}
             </button>
           </Card>
+          )}
         </div>
       )}
 

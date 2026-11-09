@@ -23,7 +23,6 @@ export class SupabaseRepository implements IDataRepository {
       name: profile.name,
       email: profile.email,
       avatarUrl: profile.avatar_url,
-      isProvisional: profile.is_provisional,
     };
   }
 
@@ -36,7 +35,6 @@ export class SupabaseRepository implements IDataRepository {
       name: p.name,
       email: p.email,
       avatarUrl: p.avatar_url,
-      isProvisional: p.is_provisional,
     }));
   }
 
@@ -49,7 +47,6 @@ export class SupabaseRepository implements IDataRepository {
       name: data.name,
       email: data.email,
       avatarUrl: data.avatar_url,
-      isProvisional: data.is_provisional,
     };
   }
 
