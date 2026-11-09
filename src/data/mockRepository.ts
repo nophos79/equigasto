@@ -71,38 +71,6 @@ export class MockRepository implements IDataRepository {
     return group;
   }
 
-  async addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group> {
-    const group = await this.getGroupById(groupId);
-    if (!group) throw new Error('Grupo no encontrado');
-
-    const newUserId = `user-prov-${Date.now()}`;
-    const newProvisionalUser: UserProfile = {
-      id: newUserId,
-      name: `${name.trim()} (Invitado)`,
-      email: null,
-      isProvisional: true,
-    };
-    this.users.push(newProvisionalUser);
-
-    const existingCount = group.members.length;
-    let memberPercentage = percentage || 0;
-
-    if (group.defaultSplitMode === 'EQUAL') {
-      const newTotal = existingCount + 1;
-      const equalShare = parseFloat((100 / newTotal).toFixed(2));
-      group.members = group.members.map(m => ({ ...m, percentage: equalShare }));
-      memberPercentage = equalShare;
-    }
-
-    group.members.push({
-      userId: newUserId,
-      role: 'MEMBER',
-      percentage: memberPercentage,
-    });
-
-    return group;
-  }
-
   async getMovements(groupId?: string): Promise<Movement[]> {
     let list = [...this.movements];
     if (groupId) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Smartphone, Globe, LogOut, CheckCircle2, UserCheck } from 'lucide-react';
+import { Shield, Smartphone, Globe, LogOut, CheckCircle2 } from 'lucide-react';
 import { repository } from '../data/mockRepository';
 import { UserProfile } from '../core/types';
 import { Card } from '../components/common/Card';
@@ -11,7 +11,6 @@ interface ProfilePageProps {
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
-  const [provisionalLinked, setProvisionalLinked] = useState(false);
 
   useEffect(() => {
     repository.getCurrentUser().then(setCurrentUser);
@@ -41,33 +40,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
             </span>
           </div>
         </div>
-      </Card>
-
-      {/* Vinculación de Participantes Provisionales (Requisito Especificación) */}
-      <Card className="space-y-3">
-        <div className="flex items-start gap-3">
-          <UserCheck className="w-5 h-5 text-brand-600 mt-0.5 shrink-0" />
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Vinculación de identidad provisional</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Si fuiste incluido en un grupo antes de registrarte mediante un perfil provisional, puedes reclamar y vincular tu historial económico completo aquí.
-            </p>
-          </div>
-        </div>
-
-        {provisionalLinked ? (
-          <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            ¡Identidades provisionales sincronizadas y consolidadas con éxito!
-          </div>
-        ) : (
-          <button
-            onClick={() => setProvisionalLinked(true)}
-            className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors"
-          >
-            Comprobar invitaciones e historial previo
-          </button>
-        )}
       </Card>
 
       {/* Configuración y Preferencias */}

@@ -12,7 +12,6 @@ export interface IDataRepository {
   deleteGroup(id: string): Promise<void>;
   /** Añade a un usuario ya registrado y verificado, identificado por su correo. */
   addMemberByEmail(groupId: string, email: string): Promise<Group>;
-  addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group>;
   
   getMovements(groupId?: string): Promise<Movement[]>;
   getMovementById(id: string): Promise<Movement | undefined>;

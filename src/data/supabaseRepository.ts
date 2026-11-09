@@ -178,31 +178,6 @@ export class SupabaseRepository implements IDataRepository {
     return this.getGroupById(groupId) as Promise<Group>;
   }
 
-  async addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group> {
-    // 1. Crear perfil provisional en Supabase
-    const { data: provProfile, error: pError } = await supabase
-      .from('profiles')
-      .insert({
-        name: `${name.trim()} (Invitado)`,
-        email: null,
-        is_provisional: true,
-      })
-      .select()
-      .single();
-
-    if (pError || !provProfile) throw pError || new Error('Error al crear perfil provisional');
-
-    // 2. Asociar a group_members
-    await supabase.from('group_members').insert({
-      group_id: groupId,
-      user_id: provProfile.id,
-      role: 'MEMBER',
-      percentage: percentage || 0,
-    });
-
-    return this.getGroupById(groupId) as Promise<Group>;
-  }
-
   async getMovements(groupId?: string): Promise<Movement[]> {
     let query = supabase.from('movements').select('*, movement_shares(*)').order('date', { ascending: false });
     if (groupId) {

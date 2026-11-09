@@ -182,7 +182,7 @@ export const GroupDetailPage: React.FC = () => {
     }
   };
 
-  const handleAddProvisionalMember = async (e: React.FormEvent) => {
+  const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMemberName.trim()) return;
 
@@ -736,7 +736,7 @@ export const GroupDetailPage: React.FC = () => {
             </Card>
           </form>
 
-          {/* Añadir Participante Provisional */}
+          {/* Añadir miembro por correo (usuario registrado y verificado) */}
           <Card className="space-y-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -748,7 +748,7 @@ export const GroupDetailPage: React.FC = () => {
               </p>
             </div>
 
-            <form onSubmit={handleAddProvisionalMember} className="flex gap-2">
+            <form onSubmit={handleAddMember} className="flex gap-2">
               <input
                 type="email"
                 placeholder="correo@ejemplo.com"

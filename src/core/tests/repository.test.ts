@@ -2,22 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MockRepository } from '../../data/mockRepository.ts';
 
-test('MockRepository: añadir miembro provisional y recalcular reparto igualitario', async () => {
+test('MockRepository: añadir miembro por correo (usuario registrado) y recalcular reparto', async () => {
   const repo = new MockRepository();
-  const group = await repo.getGroupById('group-1');
+  const group = await repo.getGroupById('group-3');
   assert.ok(group);
   const initialCount = group.members.length;
+  assert.equal(group.members.some((m) => m.userId === 'user-3'), false);
 
-  const updatedGroup = await repo.addMemberToGroup(group.id, 'Laura Gómez');
-  assert.equal(updatedGroup.members.length, initialCount + 1);
-
-  const newMember = updatedGroup.members[updatedGroup.members.length - 1];
-  const user = await repo.getUserById(newMember.userId);
-  assert.ok(user);
-  assert.equal(user.isProvisional, true);
-  assert.match(user.name, /Laura Gómez/);
+  const updated = await repo.addMemberByEmail(group.id, 'MARTA.sanchez@example.com');
+  assert.equal(updated.members.length, initialCount + 1);
+  assert.ok(updated.members.some((m) => m.userId === 'user-3'));
 });
 
+test('MockRepository: rechaza correos no registrados y miembros ya existentes', async () => {
+  const repo = new MockRepository();
+  await assert.rejects(() => repo.addMemberByEmail('group-3', 'nadie@example.com'), /registrado y verificado/);
+  await assert.rejects(() => repo.addMemberByEmail('group-3', 'luis.gomez@example.com'), /ya es miembro/);
+});
 test('MockRepository: actualizar configuración de grupo y porcentajes', async () => {
   const repo = new MockRepository();
   const group = await repo.getGroupById('group-2');
