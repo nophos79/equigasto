@@ -21,6 +21,21 @@ function getSystemTheme(): ResolvedTheme {
   return 'light';
 }
 
+function updateDOMTheme(resolved: ResolvedTheme) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (resolved === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute('content', resolved === 'dark' ? '#0f172a' : '#4f46e5');
+  }
+}
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
@@ -33,29 +48,20 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
-    if (theme === 'system') return getSystemTheme();
-    return theme;
+    const resolved = theme === 'system' ? getSystemTheme() : theme;
+    if (typeof window !== 'undefined') {
+      updateDOMTheme(resolved);
+    }
+    return resolved;
   });
 
   useEffect(() => {
-    const root = document.documentElement;
     const media = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = () => {
-      const activeResolved = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
+      const activeResolved: ResolvedTheme = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme;
       setResolvedTheme(activeResolved);
-
-      if (activeResolved === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-
-      // Actualizar meta theme-color para navegadores móviles
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', activeResolved === 'dark' ? '#0f172a' : '#4f46e5');
-      }
+      updateDOMTheme(activeResolved);
     };
 
     applyTheme();
@@ -72,7 +78,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem(STORAGE_KEY, newTheme);
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme);
+    } catch {}
+    const nextResolved: ResolvedTheme = newTheme === 'system' ? getSystemTheme() : newTheme;
+    setResolvedTheme(nextResolved);
+    updateDOMTheme(nextResolved);
   };
 
   const toggleTheme = () => {
