@@ -70,3 +70,13 @@ export function splitEqually(totalCents: number, count: number): number[] {
   }
   return shares;
 }
+
+/**
+ * Formatea un porcentaje garantizando siempre 2 decimales y coma como separador decimal.
+ * Ejemplo: 1.8 -> "1,80 %" o con includeSymbol=false -> "1,80"
+ */
+export function formatPercentage(val: number, includeSymbol = true): string {
+  const num = Number(val) || 0;
+  const formatted = num.toFixed(2).replace('.', ',');
+  return includeSymbol ? `${formatted}%` : formatted;
+}

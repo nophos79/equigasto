@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { eurosToCents, centsToEuros, formatCurrency, splitEqually } from '../money.ts';
+import { eurosToCents, centsToEuros, formatCurrency, splitEqually, formatPercentage } from '../money.ts';
 
 test('eurosToCents: conversiones exactas sin errores de coma flotante', () => {
   assert.equal(eurosToCents(19.99), 1999);
@@ -42,4 +42,13 @@ test('formatCurrency: formato de moneda en euros', () => {
 
   const formattedSigned = formatCurrency(12050, { showSign: true });
   assert.ok(formattedSigned.startsWith('+'));
+});
+
+test('formatPercentage: siempre 2 decimales y coma decimal', () => {
+  assert.equal(formatPercentage(1.8), '1,80%');
+  assert.equal(formatPercentage(50), '50,00%');
+  assert.equal(formatPercentage(33.3333), '33,33%');
+  assert.equal(formatPercentage(0), '0,00%');
+  assert.equal(formatPercentage(100), '100,00%');
+  assert.equal(formatPercentage(1.8, false), '1,80');
 });

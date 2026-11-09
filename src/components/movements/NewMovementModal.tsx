@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Users, UserCheck, ArrowRightLeft, CreditCard, Percent, AlertCircle } from 'lucide-react';
+import { X, Users, UserCheck, ArrowRightLeft, CreditCard, Percent, AlertCircle, User } from 'lucide-react';
 import { Group, MovementType, SplitMode, UserProfile, Movement, SimplifiedDebt } from '../../core/types';
-import { eurosToCents, centsToEuros, splitEqually, formatCurrency } from '../../core/money';
+import { eurosToCents, centsToEuros, splitEqually, formatCurrency, formatPercentage } from '../../core/money';
 import { splitByPercentages } from '../../core/split';
 import { validateSettlement } from '../../core/settlement';
 import { repository } from '../../data/index';
@@ -105,6 +105,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   // Calcular la suma actual de porcentajes cuando se está en modo porcentaje
   const totalPercentageSum = groupMembers.reduce((acc, m) => acc + (m.percentage || 0), 0);
   const isPercentageValid = Math.abs(totalPercentageSum - 100) < 0.05;
+  const isSingleMemberGroup = groupMembers.length === 1;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +120,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
     }
 
     if (type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && !isPercentageValid) {
-      alert(`Los porcentajes del grupo suman ${totalPercentageSum.toFixed(2)}%. Corrígelos en Configuración del grupo para poder repartir.`);
+      alert(`Los porcentajes del grupo suman ${formatPercentage(totalPercentageSum)}. Corrígelos en Configuración del grupo para poder repartir.`);
       return;
     }
 
@@ -205,8 +206,13 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           </button>
         </div>
 
-        {/* Tipo de movimiento selector (deshabilitado en edición para preservar la naturaleza) */}
-        {!isEditing && (
+        {/* Tipo de movimiento selector */}
+        {!isEditing && isSingleMemberGroup ? (
+          <div className="px-6 py-2.5 bg-indigo-50/80 border-b border-indigo-100 flex items-center gap-2 text-xs font-semibold text-indigo-800">
+            <User className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span>Espacio de uso individual: gasto personal propio.</span>
+          </div>
+        ) : !isEditing && (
           <div className="p-4 bg-slate-50/70 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               type="button"
@@ -392,7 +398,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                   {groupMembers.map((m) => (
                     <div key={m.userId} className="flex items-center justify-between text-slate-600">
                       <span className="truncate">{m.name}</span>
-                      <span className="font-medium">{m.percentage}%</span>
+                      <span className="font-medium">{formatPercentage(m.percentage)}</span>
                     </div>
                   ))}
                 </div>
@@ -401,7 +407,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               {splitMode === 'PERCENTAGE' && !isPercentageValid && (
                 <p className="text-[11px] text-rose-600 flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
-                  Los porcentajes del grupo suman {totalPercentageSum.toFixed(2)}%. Corrígelos en la configuración del grupo.
+                  Los porcentajes del grupo suman {formatPercentage(totalPercentageSum)}. Corrígelos en la configuración del grupo.
                 </p>
               )}
             </div>

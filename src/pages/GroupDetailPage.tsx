@@ -14,7 +14,7 @@ import { repository } from '../data/index';
 import { MovementImpact } from '../components/movements/MovementImpact';
 import { useRealtime } from '../hooks/useRealtime';
 import { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt, SplitMode } from '../core/types';
-import { formatCurrency } from '../core/money';
+import { formatCurrency, formatPercentage } from '../core/money';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
@@ -52,6 +52,7 @@ export const GroupDetailPage: React.FC = () => {
   const [editGroupDesc, setEditGroupDesc] = useState('');
   const [editSplitMode, setEditSplitMode] = useState<SplitMode>('EQUAL');
   const [memberPercentages, setMemberPercentages] = useState<Record<string, number>>({});
+  const [percentageInputs, setPercentageInputs] = useState<Record<string, string>>({});
   const [newMemberName, setNewMemberName] = useState('');
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [configSuccessMsg, setConfigSuccessMsg] = useState('');
@@ -154,7 +155,7 @@ export const GroupDetailPage: React.FC = () => {
     if (!editGroupName.trim()) return;
 
     if (editSplitMode === 'PERCENTAGE' && !isPercentageValid) {
-      alert(`La suma de los porcentajes debe ser exactamente 100% (actualmente: ${totalPercentageSum.toFixed(2)}%)`);
+      alert(`La suma de los porcentajes debe ser exactamente 100% (actualmente: ${formatPercentage(totalPercentageSum)})`);
       return;
     }
 
@@ -675,7 +676,7 @@ export const GroupDetailPage: React.FC = () => {
                         isPercentageValid ? 'text-emerald-600' : 'text-rose-600'
                       }`}
                     >
-                      Total: {totalPercentageSum.toFixed(2)}% {isPercentageValid ? '✓' : '(Debe sumar 100%)'}
+                      Total: {formatPercentage(totalPercentageSum)} {isPercentageValid ? '✓' : '(Debe sumar 100%)'}
                     </span>
                   </div>
 
@@ -697,18 +698,37 @@ export const GroupDetailPage: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              value={memberPercentages[m.userId] ?? m.percentage}
-                              onChange={(e) =>
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="0,00"
+                              value={percentageInputs[m.userId] ?? formatPercentage(memberPercentages[m.userId] ?? m.percentage, false)}
+                              onChange={(e) => {
+                                const raw = e.target.value.replace(',', '.');
+                                if (raw === '') {
+                                  setPercentageInputs((prev) => ({ ...prev, [m.userId]: '' }));
+                                  setMemberPercentages((prev) => ({ ...prev, [m.userId]: 0 }));
+                                  return;
+                                }
+                                // Limitar: máximo 3 dígitos enteros y hasta 2 decimales
+                                if (!/^\d{0,3}(\.\d{0,2})?$/.test(raw)) return;
+                                const num = parseFloat(raw);
+                                if (!isNaN(num) && num > 100) return;
+                                setPercentageInputs((prev) => ({ ...prev, [m.userId]: e.target.value }));
+                                setMemberPercentages((prev) => ({ ...prev, [m.userId]: isNaN(num) ? 0 : num }));
+                              }}
+                              onBlur={() => {
+                                const current = memberPercentages[m.userId] || 0;
+                                const clamped = Math.min(100, Math.max(0, current));
+                                setPercentageInputs((prev) => ({
+                                  ...prev,
+                                  [m.userId]: formatPercentage(clamped, false),
+                                }));
                                 setMemberPercentages((prev) => ({
                                   ...prev,
-                                  [m.userId]: parseFloat(e.target.value) || 0,
-                                }))
-                              }
-                              className="w-20 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-right font-bold text-slate-800 focus:ring-1 focus:ring-brand-500"
+                                  [m.userId]: clamped,
+                                }));
+                              }}
+                              className="w-24 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-right font-bold text-slate-800 focus:ring-1 focus:ring-brand-500"
                             />
                             <span className="text-slate-400 font-bold">%</span>
                           </div>

@@ -14,7 +14,15 @@ export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId
   const net = calculateMovementImpact(movement, userId);
 
   if (net === 0) {
-    return <span className="text-xs text-slate-400 font-medium">Sin saldo en este movimiento</span>;
+    const isPersonal =
+      movement.shares.length === 1 &&
+      movement.shares[0].userId === movement.paidById &&
+      movement.paidById === userId;
+
+    if (isPersonal) {
+      return <span className="text-xs text-indigo-600 font-semibold">Gasto personal</span>;
+    }
+    return <span className="text-xs text-slate-400 font-medium">Sin saldo pendiente</span>;
   }
 
   return net > 0 ? (

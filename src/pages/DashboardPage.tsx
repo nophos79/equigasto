@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import {
+  User,
   TrendingUp,
   TrendingDown,
   Scale,
   Users,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { repository } from '../data/index';
 import { MovementImpact } from '../components/movements/MovementImpact';
+import { PersonalExpensesWidget } from '../components/dashboard/PersonalExpensesWidget';
 import { Group, Movement, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
@@ -25,6 +26,7 @@ export const DashboardPage: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupBalances, setGroupBalances] = useState<Record<string, number>>({});
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
+  const [allMovements, setAllMovements] = useState<Movement[]>([]);
   const [overall, setOverall] = useState({ totalOwedCents: 0, totalOwesCents: 0, netCents: 0 });
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
@@ -49,6 +51,7 @@ export const DashboardPage: React.FC = () => {
     setCurrentUser(user);
     setAllUsers(users);
     setGroups(grps);
+    setAllMovements(movs);
     setRecentMovements(movs.slice(0, 5));
     setOverall(stats);
     setGroupBalances(balancesMap);
@@ -148,6 +151,9 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Cuadro de Gastos Personales (Uso individual) */}
+      <PersonalExpensesWidget groups={groups} movements={allMovements} />
+
       {/* Grupos Activos */}
       <div>
         <div className="flex items-center justify-between mb-3.5">
@@ -166,6 +172,8 @@ export const DashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {groups.map((group) => {
             const balanceCents = groupBalances[group.id] || 0;
+            const isIndividual = group.members.length === 1;
+
             return (
               <Link key={group.id} to={`/groups/${group.id}`}>
                 <Card hoverable className="h-full flex flex-col justify-between">
@@ -174,9 +182,16 @@ export const DashboardPage: React.FC = () => {
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl shadow-inner">
                         {group.icon}
                       </div>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                        {group.members.length} miembros
-                      </span>
+                      {isIndividual ? (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          Personal
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                          {group.members.length} miembros
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="font-bold text-slate-900 text-base mb-1 group-hover:text-brand-600">
@@ -187,19 +202,27 @@ export const DashboardPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between mt-2">
-                    <span className="text-xs text-slate-400 font-medium">Tu balance:</span>
-                    <span
-                      className={`text-sm font-bold ${
-                        balanceCents > 0
-                          ? 'text-emerald-600'
-                          : balanceCents < 0
-                          ? 'text-rose-600'
-                          : 'text-slate-500'
-                      }`}
-                    >
-                      {formatCurrency(balanceCents, { showSign: true })}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs mt-2">
+                    <span className="text-slate-400">
+                      {isIndividual ? 'Tipo:' : 'Tu balance:'}
                     </span>
+                    {isIndividual ? (
+                      <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
+                        Uso personal
+                      </span>
+                    ) : (
+                      <span
+                        className={`font-bold ${
+                          balanceCents > 0
+                            ? 'text-emerald-600'
+                            : balanceCents < 0
+                            ? 'text-rose-600'
+                            : 'text-slate-500'
+                        }`}
+                      >
+                        {formatCurrency(balanceCents, { showSign: true })}
+                      </span>
+                    )}
                   </div>
                 </Card>
               </Link>
@@ -208,18 +231,15 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Últimos Movimientos */}
+      {/* Actividad Reciente */}
       <div>
         <div className="flex items-center justify-between mb-3.5">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-brand-600" />
-            <h2 className="text-lg font-bold text-slate-900">Últimos Movimientos</h2>
-          </div>
+          <h2 className="text-lg font-bold text-slate-900">Actividad Reciente</h2>
           <Link
             to="/activity"
             className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-0.5"
           >
-            Ver historial completo <ChevronRight className="w-4 h-4" />
+            Ver toda <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
 
@@ -274,14 +294,17 @@ export const DashboardPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Modal Detalle Movimiento */}
+      {/* Modal Detalle de Movimiento */}
       {selectedMovement && (
         <MovementDetailModal
           movement={selectedMovement}
           users={allUsers}
           group={groups.find((g) => g.id === selectedMovement.groupId)}
           onClose={() => setSelectedMovement(null)}
-          onDeleted={loadData}
+          onDeleted={() => {
+            setSelectedMovement(null);
+            triggerRefresh();
+          }}
           onEdit={(mov) => {
             setMovementToEdit(mov);
           }}
@@ -293,11 +316,11 @@ export const DashboardPage: React.FC = () => {
         <NewMovementModal
           groups={groups}
           currentUser={currentUser}
+          initialGroupId={movementToEdit.groupId}
           movementToEdit={movementToEdit}
           onClose={() => setMovementToEdit(null)}
           onCreated={() => {
             setMovementToEdit(null);
-            loadData();
             triggerRefresh();
           }}
         />
