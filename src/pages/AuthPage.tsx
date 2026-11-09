@@ -5,7 +5,7 @@ import type { AuthActions } from '../hooks/useAuth';
 interface AuthPageProps {
   error: string | null;
   loading: boolean;
-  actions: Pick<AuthActions, 'signIn' | 'signUp' | 'clearError'>;
+  actions: Pick<AuthActions, 'signIn' | 'signUp' | 'resend' | 'clearError'>;
 }
 
 type AuthMode = 'signin' | 'signup';
@@ -17,6 +17,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ error, loading, actions }) =
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [signUpSuccess, setSignUpSuccess] = useState(false);
+  const [resendOk, setResendOk] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -99,6 +100,23 @@ export const AuthPage: React.FC<AuthPageProps> = ({ error, loading, actions }) =
               <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
               <p className="text-xs text-rose-700 font-medium">{error}</p>
             </div>
+          )}
+
+          {/* Reenviar correo de confirmación */}
+          {resendOk && (
+            <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 font-medium">
+              Correo de confirmación reenviado. Revisa tu bandeja y abre el enlace pronto: caduca en poco tiempo.
+            </div>
+          )}
+          {error && /confirmar|caducado/i.test(error) && (
+            <button
+              type="button"
+              disabled={loading || !email}
+              onClick={async () => setResendOk(await actions.resend(email))}
+              className="w-full mb-5 py-2.5 border border-brand-300 text-brand-700 hover:bg-brand-50 disabled:opacity-50 rounded-xl text-xs font-semibold"
+            >
+              {email ? 'Reenviar correo de confirmación' : 'Escribe tu correo abajo para reenviar la confirmación'}
+            </button>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">

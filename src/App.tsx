@@ -13,7 +13,7 @@ import { useAuth } from './hooks/useAuth';
 import { isSupabaseConfigured } from './data/supabaseClient';
 
 export const App: React.FC = () => {
-  const { session, loading, busy, error, signIn, signUp, signOut, clearError } = useAuth();
+  const { session, loading, busy, error, signIn, signUp, resend, signOut, clearError } = useAuth();
 
   // Esperando a que Supabase resuelva la sesión inicial
   if (loading) {
@@ -30,7 +30,7 @@ export const App: React.FC = () => {
       <AuthPage
         error={error}
         loading={busy}
-        actions={{ signIn, signUp, clearError }}
+        actions={{ signIn, signUp, resend, clearError }}
       />
     );
   }

@@ -9,6 +9,9 @@ export interface IDataRepository {
   getGroupById(id: string): Promise<Group | undefined>;
   createGroup(group: Omit<Group, 'id' | 'createdAt'>): Promise<Group>;
   updateGroup(id: string, groupData: Partial<Group>): Promise<Group>;
+  deleteGroup(id: string): Promise<void>;
+  /** Añade a un usuario ya registrado y verificado, identificado por su correo. */
+  addMemberByEmail(groupId: string, email: string): Promise<Group>;
   addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group>;
   
   getMovements(groupId?: string): Promise<Movement[]>;

@@ -46,6 +46,31 @@ export class MockRepository implements IDataRepository {
     return this.groups[index];
   }
 
+  async deleteGroup(id: string): Promise<void> {
+    this.groups = this.groups.filter(g => g.id !== id);
+    this.movements = this.movements.filter(m => m.groupId !== id);
+  }
+
+  async addMemberByEmail(groupId: string, email: string): Promise<Group> {
+    const group = await this.getGroupById(groupId);
+    if (!group) throw new Error('Grupo no encontrado');
+
+    const user = this.users.find(
+      (u) => !u.isProvisional && u.email?.toLowerCase() === email.trim().toLowerCase()
+    );
+    if (!user) throw new Error('No existe ningún usuario registrado y verificado con ese correo');
+    if (group.members.some((m) => m.userId === user.id)) {
+      throw new Error('Ese usuario ya es miembro del grupo');
+    }
+
+    group.members.push({ userId: user.id, role: 'MEMBER', percentage: 0 });
+    if (group.defaultSplitMode === 'EQUAL') {
+      const share = parseFloat((100 / group.members.length).toFixed(2));
+      group.members = group.members.map((m) => ({ ...m, percentage: share }));
+    }
+    return group;
+  }
+
   async addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group> {
     const group = await this.getGroupById(groupId);
     if (!group) throw new Error('Grupo no encontrado');

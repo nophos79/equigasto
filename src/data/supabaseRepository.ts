@@ -117,10 +117,10 @@ export class SupabaseRepository implements IDataRepository {
       .select()
       .single();
 
-    if (gError || !newGroup) throw gError || new Error('Error al crear grupo');
+    if (gError || !newGroup) throw new Error('No se pudo crear el grupo: ' + (gError?.message ?? 'error desconocido'));
 
     if (groupData.members.length > 0) {
-      await supabase.from('group_members').insert(
+      const { error: mError } = await supabase.from('group_members').insert(
         groupData.members.map((m) => ({
           group_id: newGroup.id,
           user_id: m.userId,
@@ -128,6 +128,11 @@ export class SupabaseRepository implements IDataRepository {
           percentage: m.percentage,
         }))
       );
+      if (mError) {
+        // Revertir para no dejar un grupo huérfano
+        await supabase.from('groups').delete().eq('id', newGroup.id);
+        throw new Error('No se pudieron añadir los miembros: ' + mError.message);
+      }
     }
 
     return this.getGroupById(newGroup.id) as Promise<Group>;
@@ -154,6 +159,23 @@ export class SupabaseRepository implements IDataRepository {
     }
 
     return this.getGroupById(id) as Promise<Group>;
+  }
+
+  async deleteGroup(id: string): Promise<void> {
+    const { data, error } = await supabase.from('groups').delete().eq('id', id).select('id');
+    if (error) throw new Error('No se pudo eliminar el grupo: ' + error.message);
+    if (!data || data.length === 0) {
+      throw new Error('No se eliminó nada: solo el creador del grupo puede eliminarlo.');
+    }
+  }
+
+  async addMemberByEmail(groupId: string, email: string): Promise<Group> {
+    const { error } = await supabase.rpc('add_member_by_email', {
+      p_group_id: groupId,
+      p_email: email.trim(),
+    });
+    if (error) throw new Error(error.message);
+    return this.getGroupById(groupId) as Promise<Group>;
   }
 
   async addMemberToGroup(groupId: string, name: string, percentage?: number): Promise<Group> {

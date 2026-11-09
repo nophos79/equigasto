@@ -19,6 +19,8 @@ export const GroupsPage: React.FC = () => {
   const [newGroupIcon, setNewGroupIcon] = useState('🏖️');
   const [newGroupSplitMode, setNewGroupSplitMode] = useState<SplitMode>('EQUAL');
   const [initialInvitedNames, setInitialInvitedNames] = useState<string[]>(['']);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   const loadData = async () => {
     const user = await repository.getCurrentUser();
@@ -55,30 +57,46 @@ export const GroupsPage: React.FC = () => {
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGroupName.trim() || !currentUser) return;
+    if (!newGroupName.trim() || !currentUser || isCreating) return;
 
-    // Crear el grupo inicialmente con el creador
-    const createdGroup = await repository.createGroup({
-      name: newGroupName.trim(),
-      description: newGroupDesc.trim() || undefined,
-      icon: newGroupIcon,
-      category: 'friends',
-      createdBy: currentUser.id,
-      defaultSplitMode: newGroupSplitMode,
-      members: [{ userId: currentUser.id, role: 'ADMIN', percentage: 100 }],
-    });
+    setIsCreating(true);
+    setCreateError('');
+    try {
+      // Crear el grupo inicialmente con el creador
+      const createdGroup = await repository.createGroup({
+        name: newGroupName.trim(),
+        description: newGroupDesc.trim() || undefined,
+        icon: newGroupIcon,
+        category: 'friends',
+        createdBy: currentUser.id,
+        defaultSplitMode: newGroupSplitMode,
+        members: [{ userId: currentUser.id, role: 'ADMIN', percentage: 100 }],
+      });
 
-    // Añadir miembros provisionales especificados
-    const validNames = initialInvitedNames.map((n) => n.trim()).filter(Boolean);
-    for (const name of validNames) {
-      await repository.addMemberToGroup(createdGroup.id, name);
+      // Añadir los miembros indicados (usuarios registrados y verificados)
+      const validNames = initialInvitedNames.map((n) => n.trim()).filter(Boolean);
+      const failed: string[] = [];
+      for (const memberEmail of validNames) {
+        try {
+          await repository.addMemberByEmail(createdGroup.id, memberEmail);
+        } catch (err) {
+          failed.push(memberEmail + ': ' + (err instanceof Error ? err.message : 'error'));
+        }
+      }
+      if (failed.length > 0) {
+        alert('El grupo se creó, pero no se pudo añadir a:\n' + failed.join('\n'));
+      }
+
+      setIsCreateModalOpen(false);
+      setNewGroupName('');
+      setNewGroupDesc('');
+      setInitialInvitedNames(['']);
+      triggerRefresh();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Error al crear el grupo');
+    } finally {
+      setIsCreating(false);
     }
-
-    setIsCreateModalOpen(false);
-    setNewGroupName('');
-    setNewGroupDesc('');
-    setInitialInvitedNames(['']);
-    triggerRefresh();
   };
 
   return (
@@ -225,7 +243,7 @@ export const GroupsPage: React.FC = () => {
               <div className="pt-2 border-t border-slate-100">
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-                    <UserPlus className="w-3.5 h-3.5" /> Invitar miembros provisionales:
+                    <UserPlus className="w-3.5 h-3.5" /> Añadir miembros (correo de usuarios registrados):
                   </label>
                   <button
                     type="button"
@@ -239,8 +257,8 @@ export const GroupsPage: React.FC = () => {
                   {initialInvitedNames.map((name, idx) => (
                     <div key={idx} className="flex gap-2">
                       <input
-                        type="text"
-                        placeholder={`Nombre participante ${idx + 1}...`}
+                        type="email"
+                        placeholder={`correo${idx + 1}@ejemplo.com`}
                         value={name}
                         onChange={(e) => handleInvitedNameChange(idx, e.target.value)}
                         className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"
@@ -259,6 +277,12 @@ export const GroupsPage: React.FC = () => {
                 </div>
               </div>
 
+              {createError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium break-words">
+                  {createError}
+                </div>
+              )}
+
               <div className="pt-2 flex gap-3">
                 <button
                   type="button"
@@ -269,9 +293,10 @@ export const GroupsPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/20"
+                  disabled={isCreating}
+                  className="flex-1 py-2.5 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/20"
                 >
-                  Crear Grupo
+                  {isCreating ? 'Creando...' : 'Crear Grupo'}
                 </button>
               </div>
             </form>

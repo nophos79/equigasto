@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useOutletContext } from 'react-router-dom';
+import { useParams, Link, useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Scale,
@@ -21,6 +21,7 @@ import { NewMovementModal } from '../components/movements/NewMovementModal';
 
 export const GroupDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { refreshTrigger, triggerRefresh } = useOutletContext<{ refreshTrigger: number; triggerRefresh: () => void }>();
 
   const [group, setGroup] = useState<Group | null>(null);
@@ -54,6 +55,24 @@ export const GroupDetailPage: React.FC = () => {
   const [configSuccessMsg, setConfigSuccessMsg] = useState('');
 
   const [loading, setLoading] = useState(true);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+
+  const handleDeleteGroup = async () => {
+    if (!group) return;
+    const ok = window.confirm(
+      '¿Eliminar el grupo "' + group.name + '"? Se borrarán también todos sus movimientos. Esta acción no se puede deshacer.'
+    );
+    if (!ok) return;
+    setIsDeletingGroup(true);
+    try {
+      await repository.deleteGroup(group.id);
+      triggerRefresh();
+      navigate('/groups');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo eliminar el grupo');
+      setIsDeletingGroup(false);
+    }
+  };
 
   const loadData = async () => {
     if (!id) return;
@@ -156,12 +175,11 @@ export const GroupDetailPage: React.FC = () => {
     if (!newMemberName.trim()) return;
 
     try {
-      await repository.addMemberToGroup(group.id, newMemberName.trim());
+      await repository.addMemberByEmail(group.id, newMemberName.trim());
       setNewMemberName('');
       triggerRefresh();
     } catch (err) {
-      console.error(err);
-      alert('Error al añadir participante');
+      alert(err instanceof Error ? err.message : 'Error al añadir al miembro');
     }
   };
 
@@ -259,7 +277,7 @@ export const GroupDetailPage: React.FC = () => {
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          Balances ({balances.length})
+          Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
         </button>
         <button
           onClick={() => setActiveTab('debts')}
@@ -711,17 +729,17 @@ export const GroupDetailPage: React.FC = () => {
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-brand-600" />
-                <span>Incorporar Miembro Provisional</span>
+                <span>Añadir miembro</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Permite añadir a una persona que todavía no tenga cuenta en la aplicación para registrar sus gastos y deudas.
+                Introduce el correo de una persona que ya esté registrada y haya verificado su cuenta en EquiGasto.
               </p>
             </div>
 
             <form onSubmit={handleAddProvisionalMember} className="flex gap-2">
               <input
-                type="text"
-                placeholder="Nombre del nuevo participante..."
+                type="email"
+                placeholder="correo@ejemplo.com"
                 required
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
@@ -734,6 +752,24 @@ export const GroupDetailPage: React.FC = () => {
                 Añadir al grupo
               </button>
             </form>
+          </Card>
+
+          {/* Zona de peligro */}
+          <Card className="space-y-3 border-rose-200">
+            <div>
+              <h3 className="text-base font-bold text-rose-700">Zona de peligro</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Eliminar el grupo borra de forma permanente todos sus movimientos y reparticiones.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDeleteGroup}
+              disabled={isDeletingGroup}
+              className="px-4 py-2 border border-rose-300 text-rose-600 hover:bg-rose-50 disabled:opacity-50 rounded-xl text-xs font-semibold"
+            >
+              {isDeletingGroup ? 'Eliminando...' : 'Eliminar grupo'}
+            </button>
           </Card>
         </div>
       )}
