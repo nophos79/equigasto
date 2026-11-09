@@ -11,6 +11,7 @@ import {
   Percent,
 } from 'lucide-react';
 import { repository } from '../data/mockRepository';
+import { useRealtime } from '../hooks/useRealtime';
 import { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt, SplitMode } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
@@ -74,9 +75,9 @@ export const GroupDetailPage: React.FC = () => {
     }
   };
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     if (!id) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     const grp = await repository.getGroupById(id);
     const user = await repository.getCurrentUser();
     const users = await repository.getUsers();
@@ -91,7 +92,7 @@ export const GroupDetailPage: React.FC = () => {
     setBalances(bals);
     setSimplifiedDebts(debts);
 
-    if (grp) {
+    if (grp && !silent) {
       setEditGroupName(grp.name);
       setEditGroupDesc(grp.description || '');
       setEditSplitMode(grp.defaultSplitMode);
@@ -108,6 +109,17 @@ export const GroupDetailPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [id, refreshTrigger]);
+
+  // Tiempo real: refresco silencioso cuando alguien cambia datos de este grupo
+  useRealtime(
+    'group-' + (id ?? ''),
+    [
+      { table: 'movements', filter: id ? 'group_id=eq.' + id : undefined },
+      { table: 'movement_shares' },
+      { table: 'group_members', filter: id ? 'group_id=eq.' + id : undefined },
+    ],
+    () => loadData(true),
+  );
 
   if (loading || !group || !currentUser) {
     return (
