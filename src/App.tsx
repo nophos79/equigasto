@@ -52,7 +52,7 @@ export const AppContent: React.FC = () => {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-        <Route path="/" element={<AppLayout />}>
+        <Route path="/" element={<AppLayout onSignOut={signOut} />}>
           <Route index element={<DashboardPage />} />
           <Route path="groups" element={<GroupsPage />} />
           <Route path="groups/:id" element={<GroupDetailPage />} />

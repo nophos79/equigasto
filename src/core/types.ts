@@ -12,6 +12,9 @@ export interface UserProfile {
   name: string;
   email: string | null;
   avatarUrl?: string;
+  isApproved?: boolean;
+  isAdmin?: boolean;
+  createdAt?: string;
 }
 
 export interface GroupMemberConfig {

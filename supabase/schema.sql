@@ -13,6 +13,8 @@ create table if not exists public.profiles (
   name text not null,
   email text,
   avatar_url text,
+  is_approved boolean not null default false,
+  is_admin boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -123,6 +125,32 @@ as $$
   );
 $$;
 
+create or replace function public.is_current_user_admin()
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select coalesce(
+    (select is_admin from public.profiles where auth_user_id = auth.uid() limit 1),
+    false
+  );
+$$;
+
+create or replace function public.is_current_user_approved()
+returns boolean
+language sql
+security definer
+stable
+set search_path = public
+as $$
+  select coalesce(
+    (select is_approved from public.profiles where auth_user_id = auth.uid() limit 1),
+    false
+  );
+$$;
+
 -- 10. POLÍTICAS DE ROW LEVEL SECURITY (RLS)
 alter table public.profiles enable row level security;
 alter table public.groups enable row level security;
@@ -136,7 +164,8 @@ drop policy if exists "profiles_select_policy" on public.profiles;
 create policy "profiles_select_policy" on public.profiles
 for select using (
   auth_user_id = auth.uid()
-  or public.shares_group_with(id)
+  or public.is_current_user_admin()
+  or (public.is_current_user_approved() and public.shares_group_with(id))
 );
 
 drop policy if exists "profiles_insert_policy" on public.profiles;
@@ -151,13 +180,15 @@ for update using (auth_user_id = auth.uid());
 drop policy if exists "groups_select_policy" on public.groups;
 create policy "groups_select_policy" on public.groups
 for select using (
-  public.is_member_of_group(id) or created_by = public.current_profile_id()
+  public.is_current_user_approved() and (
+    public.is_member_of_group(id) or created_by = public.current_profile_id()
+  )
 );
 
 drop policy if exists "groups_insert_policy" on public.groups;
 create policy "groups_insert_policy" on public.groups
 for insert with check (
-  created_by = public.current_profile_id()
+  public.is_current_user_approved() and created_by = public.current_profile_id()
 );
 
 drop policy if exists "groups_update_policy" on public.groups;
@@ -274,13 +305,24 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  v_is_first boolean;
+  v_is_admin boolean;
 begin
-  insert into public.profiles (auth_user_id, name, email, avatar_url)
+  -- Comprobar si no hay perfiles previos
+  select not exists (select 1 from public.profiles) into v_is_first;
+  
+  -- Es admin si es el primer usuario o su email coincide con el administrador definido
+  v_is_admin := v_is_first or lower(coalesce(new.email, '')) = 'barrosod@gmail.com';
+
+  insert into public.profiles (auth_user_id, name, email, avatar_url, is_approved, is_admin)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'avatar_url',
+    v_is_admin,  -- Si es admin se aprueba automáticamente; si no, queda pendiente (false)
+    v_is_admin
   );
   return new;
 end;
@@ -309,6 +351,9 @@ begin
   if public.current_profile_id() is null then
     raise exception 'Usuario no autenticado';
   end if;
+  if not public.is_current_user_approved() then
+    raise exception 'Tu cuenta aún no ha sido aprobada por el administrador';
+  end if;
   if not public.is_member_of_group(p_group_id) then
     raise exception 'No perteneces a este grupo';
   end if;
@@ -318,10 +363,11 @@ begin
   join auth.users u on u.id = p.auth_user_id
   where lower(u.email) = lower(trim(p_email))
     and u.email_confirmed_at is not null
+    and p.is_approved = true
   limit 1;
 
   if v_profile is null then
-    raise exception 'No existe ningún usuario registrado y verificado con ese correo';
+    raise exception 'No existe ningún usuario aprobado y verificado con ese correo';
   end if;
 
   if exists (
@@ -346,7 +392,79 @@ begin
 end;
 $$;
 
--- 13. PERMISOS
+-- 13. RPCs DE ADMINISTRACIÓN Y APROBACIÓN
+create or replace function public.get_pending_approval_profiles()
+returns table (
+  id uuid,
+  name text,
+  email text,
+  avatar_url text,
+  created_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_current_user_admin() then
+    raise exception 'Acceso denegado: solo los administradores pueden consultar solicitudes pendientes.';
+  end if;
+
+  return query
+  select p.id, p.name, p.email, p.avatar_url, p.created_at
+  from public.profiles p
+  where p.is_approved = false
+  order by p.created_at desc;
+end;
+$$;
+
+create or replace function public.approve_user_profile(p_profile_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_current_user_admin() then
+    raise exception 'Acceso denegado: solo los administradores pueden aprobar cuentas.';
+  end if;
+
+  update public.profiles
+  set is_approved = true
+  where id = p_profile_id;
+
+  return true;
+end;
+$$;
+
+create or replace function public.reject_user_profile(p_profile_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_auth_user_id uuid;
+begin
+  if not public.is_current_user_admin() then
+    raise exception 'Acceso denegado: solo los administradores pueden rechazar cuentas.';
+  end if;
+
+  select auth_user_id into v_auth_user_id
+  from public.profiles
+  where id = p_profile_id and is_approved = false;
+
+  if v_auth_user_id is not null then
+    delete from public.profiles where id = p_profile_id;
+    delete from auth.users where id = v_auth_user_id;
+    return true;
+  end if;
+
+  return false;
+end;
+$$;
+
+-- 14. PERMISOS
 grant usage on schema public to authenticated, anon;
 grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.groups to authenticated;
@@ -358,8 +476,13 @@ grant execute on function public.current_profile_id() to authenticated;
 grant execute on function public.is_member_of_group(uuid) to authenticated;
 grant execute on function public.shares_group_with(uuid) to authenticated;
 grant execute on function public.add_member_by_email(uuid, text) to authenticated;
+grant execute on function public.is_current_user_admin() to authenticated;
+grant execute on function public.is_current_user_approved() to authenticated;
+grant execute on function public.get_pending_approval_profiles() to authenticated;
+grant execute on function public.approve_user_profile(uuid) to authenticated;
+grant execute on function public.reject_user_profile(uuid) to authenticated;
 
--- 14. PUBLICACIÓN REALTIME
+-- 15. PUBLICACIÓN REALTIME
 do $$
 begin
   begin

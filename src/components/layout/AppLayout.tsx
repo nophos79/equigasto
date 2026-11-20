@@ -6,8 +6,13 @@ import { BottomNav } from './BottomNav';
 import { repository } from '../../data/index';
 import { UserProfile, Group, Movement } from '../../core/types';
 import { NewMovementModal } from '../movements/NewMovementModal';
+import { PendingApprovalPage } from '../../pages/PendingApprovalPage';
 
-export const AppLayout: React.FC = () => {
+interface AppLayoutProps {
+  onSignOut?: () => Promise<void>;
+}
+
+export const AppLayout: React.FC<AppLayoutProps> = ({ onSignOut }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [isNewMovementOpen, setIsNewMovementOpen] = useState(false);
@@ -18,9 +23,13 @@ export const AppLayout: React.FC = () => {
     async function loadData() {
       try {
         const user = await repository.getCurrentUser();
-        const allGroups = await repository.getGroups();
         setCurrentUser(user);
-        setGroups(allGroups);
+        if (user.isApproved !== false) {
+          const allGroups = await repository.getGroups();
+          setGroups(allGroups);
+        } else {
+          setGroups([]);
+        }
         setLoadError(null);
       } catch (e) {
         setLoadError(e instanceof Error ? e.message : 'Error desconocido');
@@ -53,9 +62,19 @@ export const AppLayout: React.FC = () => {
 
   if (!currentUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-600"></div>
       </div>
+    );
+  }
+
+  if (currentUser.isApproved === false) {
+    return (
+      <PendingApprovalPage
+        currentUser={currentUser}
+        onCheckStatus={() => setRefreshTrigger((p) => p + 1)}
+        onSignOut={onSignOut || (async () => {})}
+      />
     );
   }
 

@@ -23,6 +23,9 @@ export class SupabaseRepository implements IDataRepository {
       name: profile.name,
       email: profile.email,
       avatarUrl: profile.avatar_url,
+      isApproved: profile.is_approved ?? true,
+      isAdmin: profile.is_admin ?? false,
+      createdAt: profile.created_at,
     };
   }
 
@@ -35,6 +38,9 @@ export class SupabaseRepository implements IDataRepository {
       name: p.name,
       email: p.email,
       avatarUrl: p.avatar_url,
+      isApproved: p.is_approved ?? true,
+      isAdmin: p.is_admin ?? false,
+      createdAt: p.created_at,
     }));
   }
 
@@ -47,6 +53,9 @@ export class SupabaseRepository implements IDataRepository {
       name: data.name,
       email: data.email,
       avatarUrl: data.avatar_url,
+      isApproved: data.is_approved ?? true,
+      isAdmin: data.is_admin ?? false,
+      createdAt: data.created_at,
     };
   }
 
@@ -335,5 +344,34 @@ export class SupabaseRepository implements IDataRepository {
       totalOwesCents,
       netCents: totalOwedCents - totalOwesCents,
     };
+  }
+
+  async getPendingUsers(): Promise<UserProfile[]> {
+    const { data, error } = await supabase.rpc('get_pending_approval_profiles');
+    if (error) {
+      console.error('Error al obtener usuarios pendientes:', error);
+      return [];
+    }
+    return (data || []).map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      avatarUrl: p.avatar_url,
+      isApproved: false,
+      isAdmin: false,
+      createdAt: p.created_at,
+    }));
+  }
+
+  async approveUser(userId: string): Promise<boolean> {
+    const { data, error } = await supabase.rpc('approve_user_profile', { p_profile_id: userId });
+    if (error) throw new Error('No se pudo aprobar al usuario: ' + error.message);
+    return !!data;
+  }
+
+  async rejectUser(userId: string): Promise<boolean> {
+    const { data, error } = await supabase.rpc('reject_user_profile', { p_profile_id: userId });
+    if (error) throw new Error('No se pudo rechazar al usuario: ' + error.message);
+    return !!data;
   }
 }

@@ -22,4 +22,9 @@ export interface IDataRepository {
   getGroupBalances(groupId: string): Promise<MemberBalance[]>;
   getGroupDebts(groupId: string): Promise<SimplifiedDebt[]>;
   getUserOverallBalance(userId: string): Promise<{ totalOwedCents: number; totalOwesCents: number; netCents: number }>;
+
+  // Administración y aprobación de usuarios
+  getPendingUsers(): Promise<UserProfile[]>;
+  approveUser(userId: string): Promise<boolean>;
+  rejectUser(userId: string): Promise<boolean>;
 }
