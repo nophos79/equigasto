@@ -442,6 +442,7 @@ export const GroupDetailPage: React.FC = () => {
               const u = allUsers.find((user) => user.id === b.userId);
               const isPositive = b.netBalanceCents > 0;
               const isNegative = b.netBalanceCents < 0;
+              const isMe = b.userId === currentUser.id;
 
               return (
                 <Card key={b.userId} className="space-y-3">
@@ -453,10 +454,10 @@ export const GroupDetailPage: React.FC = () => {
                         size="md"
                       />
                       <div>
-                        <p className="text-sm font-bold text-slate-900">
-                          {u?.name} {u?.id === currentUser.id ? '(Tú)' : ''}
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                          {u?.name} {isMe ? '(Tú)' : ''}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-slate-400 dark:text-slate-500">
                           {u?.email}
                         </p>
                       </div>
@@ -465,24 +466,28 @@ export const GroupDetailPage: React.FC = () => {
                     <span
                       className={`text-base font-black px-2.5 py-1 rounded-xl ${
                         isPositive
-                          ? 'bg-emerald-50 text-emerald-700'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300'
                           : isNegative
-                          ? 'bg-rose-50 text-rose-700'
-                          : 'bg-slate-100 text-slate-700'
+                          ? 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}
                     >
                       {formatCurrency(b.netBalanceCents, { showSign: true })}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl">
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl">
                     <div>
-                      <span className="text-slate-400 block">Total pagado:</span>
-                      <span className="font-semibold text-slate-800">{formatCurrency(b.paidCents)}</span>
+                      <span className="text-slate-400 dark:text-slate-400 block">
+                        {isMe ? 'Has pagado:' : 'Ha pagado:'}
+                      </span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(b.paidCents)}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block">Le corresponde asumir:</span>
-                      <span className="font-semibold text-slate-800">{formatCurrency(b.shouldPayCents)}</span>
+                      <span className="text-slate-400 dark:text-slate-400 block">
+                        {isMe ? 'Te toca asumir:' : 'Le toca asumir:'}
+                      </span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(b.shouldPayCents)}</span>
                     </div>
                   </div>
                 </Card>
