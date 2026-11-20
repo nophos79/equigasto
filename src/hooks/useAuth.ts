@@ -7,9 +7,11 @@ export interface AuthState {
   user: User | null;
   /** true solo mientras se resuelve la sesión inicial */
   loading: boolean;
-  /** true mientras hay un login/registro en curso */
+  /** true mientras hay un login/registro/recuperación en curso */
   busy: boolean;
   error: string | null;
+  /** true si el usuario ha entrado mediante un enlace de recuperación de contraseña */
+  isPasswordRecovery: boolean;
 }
 
 export interface AuthActions {
@@ -18,8 +20,13 @@ export interface AuthActions {
   signUp: (email: string, password: string, name: string) => Promise<boolean>;
   /** Reenvía el correo de confirmación. Devuelve true si se envió */
   resend: (email: string) => Promise<boolean>;
+  /** Envía correo de recuperación de contraseña */
+  resetPassword: (email: string) => Promise<boolean>;
+  /** Cambia la contraseña del usuario logueado o en recuperación */
+  updatePassword: (newPassword: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  clearRecovery: () => void;
 }
 
 function traducirError(msg: string): string {
@@ -28,6 +35,7 @@ function traducirError(msg: string): string {
   if (m.includes('email not confirmed')) return 'Debes confirmar tu correo antes de iniciar sesión.';
   if (m.includes('already registered')) return 'Ese correo ya está registrado.';
   if (m.includes('rate limit')) return 'Demasiados intentos. Espera unos minutos.';
+  if (m.includes('password should be at least')) return 'La contraseña debe tener al menos 6 caracteres.';
   return msg;
 }
 
@@ -40,7 +48,7 @@ function leerErrorDeUrl(): string | null {
   if (!params.get('error') && !code) return null;
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
   if (code === 'otp_expired') {
-    return 'El enlace de confirmación ha caducado o ya se usó. Introduce tu correo y pide uno nuevo.';
+    return 'El enlace ha caducado o ya se usó. Por favor solicita uno nuevo.';
   }
   return desc ? desc.replace(/\+/g, ' ') : 'No se pudo completar la verificación.';
 }
@@ -51,6 +59,10 @@ export function useAuth(): AuthState & AuthActions {
   const [loading, setLoading] = useState(isSupabaseConfigured);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(leerErrorDeUrl);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.location.hash.includes('type=recovery');
+  });
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -63,9 +75,12 @@ export function useAuth(): AuthState & AuthActions {
       })
       .finally(() => setLoading(false));
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      }
       setLoading(false);
     });
 
@@ -92,7 +107,7 @@ export function useAuth(): AuthState & AuthActions {
       const { error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name }, emailRedirectTo: window.location.origin },
+        options: { data: { name }, emailRedirectTo: window.location.origin + window.location.pathname },
       });
       if (authError) {
         setError(traducirError(authError.message));
@@ -114,7 +129,7 @@ export function useAuth(): AuthState & AuthActions {
       const { error: authError } = await supabase.auth.resend({
         type: 'signup',
         email,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: window.location.origin + window.location.pathname },
       });
       if (authError) {
         setError(traducirError(authError.message));
@@ -129,12 +144,71 @@ export function useAuth(): AuthState & AuthActions {
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    setError(null);
+    setBusy(true);
+    try {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+      if (authError) {
+        setError(traducirError(authError.message));
+        return false;
+      }
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error de conexión.');
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  const updatePassword = useCallback(async (newPassword: string) => {
+    setError(null);
+    setBusy(true);
+    try {
+      const { error: authError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (authError) {
+        setError(traducirError(authError.message));
+        return false;
+      }
+      setIsPasswordRecovery(false);
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al actualizar contraseña.');
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     setError(null);
+    setIsPasswordRecovery(false);
     await supabase.auth.signOut();
   }, []);
 
   const clearError = useCallback(() => setError(null), []);
+  const clearRecovery = useCallback(() => setIsPasswordRecovery(false), []);
 
-  return { session, user, loading, busy, error, signIn, signUp, resend, signOut, clearError };
+  return {
+    session,
+    user,
+    loading,
+    busy,
+    error,
+    isPasswordRecovery,
+    signIn,
+    signUp,
+    resend,
+    resetPassword,
+    updatePassword,
+    signOut,
+    clearError,
+    clearRecovery,
+  };
 }

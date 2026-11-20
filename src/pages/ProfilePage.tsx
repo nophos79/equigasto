@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2 } from 'lucide-react';
+import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { repository } from '../data/index';
+import { supabase } from '../data/supabaseClient';
 import { UserProfile } from '../core/types';
 import { Card } from '../components/common/Card';
 import { Avatar } from '../components/common/Avatar';
@@ -16,6 +17,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
   const [loadingPending, setLoadingPending] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Estados para cambio de contraseña
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswordText, setShowPasswordText] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     repository.getCurrentUser().then((user) => {
@@ -66,6 +75,41 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
       setFeedback({ type: 'error', message: e instanceof Error ? e.message : 'No se pudo rechazar la cuenta' });
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordFeedback(null);
+
+    if (newPassword.length < 6) {
+      setPasswordFeedback({ type: 'error', message: 'La nueva contraseña debe tener al menos 6 caracteres.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordFeedback({ type: 'error', message: 'Las contraseñas no coinciden.' });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+
+      setPasswordFeedback({ type: 'success', message: '¡Tu contraseña se ha cambiado correctamente!' });
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => {
+        setShowPasswordForm(false);
+        setPasswordFeedback(null);
+      }, 2500);
+    } catch (err) {
+      setPasswordFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'No se pudo cambiar la contraseña.',
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -218,6 +262,111 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
             </div>
           </div>
           <ThemeSelector />
+        </div>
+
+        {/* Cambiar Contraseña */}
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Contraseña de acceso</p>
+                <p className="text-xs text-slate-400">Modifica tu clave para iniciar sesión</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowPasswordForm(!showPasswordForm);
+                setPasswordFeedback(null);
+              }}
+              className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+            >
+              {showPasswordForm ? 'Ocultar' : 'Cambiar'}
+            </button>
+          </div>
+
+          {/* Formulario desplegable para cambiar contraseña */}
+          {showPasswordForm && (
+            <form onSubmit={handleUpdatePassword} className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              {passwordFeedback && (
+                <div
+                  className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                    passwordFeedback.type === 'success'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50'
+                      : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50'
+                  }`}
+                >
+                  {passwordFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                  )}
+                  <span>{passwordFeedback.message}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300 block mb-1">
+                  Nueva contraseña (mínimo 6 caracteres)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPasswordText ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    className="w-full pl-3 pr-10 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-850 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordText(!showPasswordText)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    tabIndex={-1}
+                  >
+                    {showPasswordText ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 dark:text-slate-300 block mb-1">
+                  Repetir nueva contraseña
+                </label>
+                <input
+                  type={showPasswordText ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-850 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-brand-500/20 flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {passwordLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{passwordLoading ? 'Actualizando...' : 'Guardar nueva contraseña'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm(false)}
+                  className="px-3 py-2 text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         <div className="p-4 flex items-center justify-between">

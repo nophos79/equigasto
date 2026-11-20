@@ -14,7 +14,21 @@ import { isSupabaseConfigured } from './data/supabaseClient';
 import { ThemeProvider } from './context/ThemeContext';
 
 export const AppContent: React.FC = () => {
-  const { session, loading, busy, error, signIn, signUp, resend, signOut, clearError } = useAuth();
+  const {
+    session,
+    loading,
+    busy,
+    error,
+    isPasswordRecovery,
+    signIn,
+    signUp,
+    resend,
+    resetPassword,
+    updatePassword,
+    signOut,
+    clearError,
+    clearRecovery,
+  } = useAuth();
 
   if (!isSupabaseConfigured) {
     return (
@@ -38,13 +52,22 @@ export const AppContent: React.FC = () => {
     );
   }
 
-  // Sin Supabase configurado: modo demo con datos mock (acceso directo)
-  if (isSupabaseConfigured && !session) {
+  // Sin sesión activa o en proceso de recuperación de contraseña
+  if (isSupabaseConfigured && (!session || isPasswordRecovery)) {
     return (
       <AuthPage
         error={error}
         loading={busy}
-        actions={{ signIn, signUp, resend, clearError }}
+        isPasswordRecovery={isPasswordRecovery}
+        actions={{
+          signIn,
+          signUp,
+          resend,
+          resetPassword,
+          updatePassword,
+          clearError,
+          clearRecovery,
+        }}
       />
     );
   }
