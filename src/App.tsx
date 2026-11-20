@@ -21,6 +21,7 @@ export const AppContent: React.FC = () => {
     error,
     isPasswordRecovery,
     signIn,
+    signInWithGoogle,
     signUp,
     resend,
     resetPassword,
@@ -61,6 +62,7 @@ export const AppContent: React.FC = () => {
         isPasswordRecovery={isPasswordRecovery}
         actions={{
           signIn,
+          signInWithGoogle,
           signUp,
           resend,
           resetPassword,

@@ -318,9 +318,16 @@ begin
   insert into public.profiles (auth_user_id, name, email, avatar_url, is_approved, is_admin)
   values (
     new.id,
-    coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    coalesce(
+      new.raw_user_meta_data->>'name',
+      new.raw_user_meta_data->>'full_name',
+      split_part(new.email, '@', 1)
+    ),
     new.email,
-    new.raw_user_meta_data->>'avatar_url',
+    coalesce(
+      new.raw_user_meta_data->>'avatar_url',
+      new.raw_user_meta_data->>'picture'
+    ),
     v_is_admin,  -- Si es admin se aprueba automáticamente; si no, queda pendiente (false)
     v_is_admin
   );

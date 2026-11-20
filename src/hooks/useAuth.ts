@@ -16,6 +16,8 @@ export interface AuthState {
 
 export interface AuthActions {
   signIn: (email: string, password: string) => Promise<void>;
+  /** Iniciar sesión o registrarse con cuenta de Google */
+  signInWithGoogle: () => Promise<void>;
   /** Devuelve true si el registro se completó sin error */
   signUp: (email: string, password: string, name: string) => Promise<boolean>;
   /** Reenvía el correo de confirmación. Devuelve true si se envió */
@@ -95,6 +97,25 @@ export function useAuth(): AuthState & AuthActions {
       if (authError) setError(traducirError(authError.message));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error de conexión.');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+        },
+      });
+      if (authError) setError(traducirError(authError.message));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Error al conectar con Google.');
     } finally {
       setBusy(false);
     }
@@ -203,6 +224,7 @@ export function useAuth(): AuthState & AuthActions {
     error,
     isPasswordRecovery,
     signIn,
+    signInWithGoogle,
     signUp,
     resend,
     resetPassword,
