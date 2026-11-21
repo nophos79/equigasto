@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import {
-  User,
   Users,
   ChevronRight,
 } from 'lucide-react';
@@ -26,6 +25,15 @@ export const DashboardPage: React.FC = () => {
   const [overall, setOverall] = useState({ totalOwedCents: 0, totalOwesCents: 0, netCents: 0 });
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
+  interface DebtDetail {
+  userName: string;
+  amountCents: number;
+  groupName: string;
+  groupIcon: string;
+}
+
+  const [debtsToMe, setDebtsToMe] = useState<DebtDetail[]>([]);
+  const [debtsIOwe, setDebtsIOwe] = useState<DebtDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -56,6 +64,38 @@ export const DashboardPage: React.FC = () => {
     setGroups(grps);
     setAllMovements(movs);
     setRecentMovements(movs.slice(0, 5));
+    // Deudas simplificadas para el usuario actual
+    const toMe: DebtDetail[] = [];
+    const iOwe: DebtDetail[] = [];
+    for (const g of grps) {
+      if (g.members.length > 1) {
+        try {
+          const debts = await repository.getGroupDebts(g.id);
+          for (const d of debts) {
+            if (d.toUserId === user.id) {
+              const other = users.find((u) => u.id === d.fromUserId);
+              toMe.push({
+                userName: other?.name || 'Compañero',
+                amountCents: d.amountCents,
+                groupName: g.name,
+                groupIcon: g.icon,
+              });
+            } else if (d.fromUserId === user.id) {
+              const other = users.find((u) => u.id === d.toUserId);
+              iOwe.push({
+                userName: other?.name || 'Compañero',
+                amountCents: d.amountCents,
+                groupName: g.name,
+                groupIcon: g.icon,
+              });
+            }
+          }
+        } catch (e) {}
+      }
+    }
+    setDebtsToMe(toMe);
+    setDebtsIOwe(iOwe);
+
     setOverall(stats);
     setGroupBalances(balancesMap);
     setLoading(false);
@@ -76,8 +116,8 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
       {/* Saludo y Resumen Financiero */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Hola, {currentUser.name.split(' ')[0]} 👋
@@ -87,9 +127,9 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Resumen Compacto: 3 Columnas sin textos sobrantes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* Te deben */}
-          <div className="p-2.5 sm:p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-center">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-center">
             <span className="text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide block truncate">
               Te deben
             </span>
@@ -99,7 +139,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Debes */}
-          <div className="p-2.5 sm:p-4 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-center">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-center">
             <span className="text-[11px] sm:text-xs font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wide block truncate">
               Debes
             </span>
@@ -109,7 +149,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Balance global */}
-          <div className="p-2.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
             <span className="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block truncate">
               Balance global
             </span>
@@ -126,6 +166,57 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Deudas Simplificadas: ¿A quién debo y quién me debe? */}
+        {(debtsToMe.length > 0 || debtsIOwe.length > 0) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            {/* Quién me debe */}
+            <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/40">
+              <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide block mb-1.5">
+                Te deben directamente
+              </span>
+              {debtsToMe.length === 0 ? (
+                <p className="text-xs text-slate-400">Nadie te debe dinero.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {debtsToMe.map((d, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-0.5">
+                      <span className="text-slate-800 dark:text-slate-200 font-medium truncate mr-2">
+                        <strong className="font-bold">{d.userName}</strong> te debe <span className="text-[11px] text-slate-400 font-normal">({d.groupIcon} {d.groupName})</span>
+                      </span>
+                      <span className="font-black text-emerald-600 dark:text-emerald-400 shrink-0">
+                        +{formatCurrency(d.amountCents)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* A quién debo */}
+            <div className="p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900/40">
+              <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wide block mb-1.5">
+                Debes directamente
+              </span>
+              {debtsIOwe.length === 0 ? (
+                <p className="text-xs text-slate-400">No debes nada a nadie.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {debtsIOwe.map((d, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs py-0.5">
+                      <span className="text-slate-800 dark:text-slate-200 font-medium truncate mr-2">
+                        Debes a <strong className="font-bold">{d.userName}</strong> <span className="text-[11px] text-slate-400 font-normal">({d.groupIcon} {d.groupName})</span>
+                      </span>
+                      <span className="font-black text-rose-600 dark:text-rose-400 shrink-0">
+                        -{formatCurrency(d.amountCents)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mis Grupos */}
@@ -149,54 +240,71 @@ export const DashboardPage: React.FC = () => {
             const isIndividual = group.members.length === 1;
 
             return (
-              <Link key={group.id} to={`/groups/${group.id}`}>
-                <Card hoverable className="h-full p-3 sm:p-4 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                          {group.icon}
-                        </span>
-                        {isIndividual && (
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50 flex items-center gap-1">
-                            <User className="w-3 h-3" />
-                            Personal
-                          </span>
-                        )}
-                      </div>
-                      {!isIndividual && (
-                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {group.members.length} miembros
-                        </span>
-                      )}
+              <Link key={group.id} to={`/groups/${group.id}`} className="group block">
+                <Card hoverable className="p-3 sm:p-3.5 flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <span className="text-2xl p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
+                        {group.icon}
+                      </span>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-brand-600 truncate min-w-0">
+                        {group.name}
+                      </h3>
                     </div>
-
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-brand-600 truncate">
-                      {group.name}
-                    </h3>
+                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                      {isIndividual ? 'Personal' : `${group.members.length} miembros`}
+                    </span>
                   </div>
 
-                  <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-2">
-                    <span className="text-slate-400 font-medium">
-                      {isIndividual ? 'Balance:' : balanceCents > 0 ? 'Te deben:' : balanceCents < 0 ? 'Debes:' : 'Al día:'}
+                  <div
+                    className={`mt-2.5 p-2 rounded-xl flex items-center justify-between border ${
+                      isIndividual
+                        ? 'bg-indigo-50/60 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50'
+                        : balanceCents > 0
+                        ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50'
+                        : balanceCents < 0
+                        ? 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-100 dark:border-rose-900/50'
+                        : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'
+                    }`}
+                  >
+                    <span
+                      className={`text-xs font-bold ${
+                        isIndividual
+                          ? 'text-indigo-800 dark:text-indigo-300'
+                          : balanceCents > 0
+                          ? 'text-emerald-800 dark:text-emerald-300'
+                          : balanceCents < 0
+                          ? 'text-rose-800 dark:text-rose-300'
+                          : 'text-slate-500 dark:text-slate-400'
+                      }`}
+                    >
+                      {isIndividual
+                        ? 'Balance'
+                        : balanceCents > 0
+                        ? 'Te deben'
+                        : balanceCents < 0
+                        ? 'Debes'
+                        : 'Al día'}
                     </span>
-                    {isIndividual ? (
-                      <span className={`font-bold ${balanceCents >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                        {formatCurrency(balanceCents, { showSign: true })}
-                      </span>
-                    ) : (
-                      <span
-                        className={`font-bold ${
-                          balanceCents > 0
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : balanceCents < 0
-                            ? 'text-rose-600 dark:text-rose-400'
-                            : 'text-slate-500 dark:text-slate-400'
-                        }`}
-                      >
-                        {balanceCents === 0 ? '0,00 €' : formatCurrency(Math.abs(balanceCents))}
-                      </span>
-                    )}
+                    <span
+                      className={`text-base sm:text-lg font-black ${
+                        isIndividual
+                          ? balanceCents >= 0
+                            ? 'text-indigo-900 dark:text-indigo-300'
+                            : 'text-rose-700 dark:text-rose-400'
+                          : balanceCents > 0
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : balanceCents < 0
+                          ? 'text-rose-600 dark:text-rose-400'
+                          : 'text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {isIndividual
+                        ? formatCurrency(balanceCents, { showSign: true })
+                        : balanceCents === 0
+                        ? '0,00 €'
+                        : (balanceCents > 0 ? '+' : '-') + formatCurrency(Math.abs(balanceCents))}
+                    </span>
                   </div>
                 </Card>
               </Link>

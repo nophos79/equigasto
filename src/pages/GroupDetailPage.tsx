@@ -220,13 +220,15 @@ export const GroupDetailPage: React.FC = () => {
 
         <div className="bg-white rounded-3xl border border-slate-100 p-5 sm:p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <span className="text-4xl p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">
                 {group.icon}
               </span>
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">{group.name}</h1>
-                <p className="text-xs text-slate-500 mt-0.5">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight break-all line-clamp-2">
+                  {group.name}
+                </h1>
+                <p className="text-xs text-slate-500 mt-0.5 break-all line-clamp-2">
                   {group.description || 'Sin descripción'} • {group.members.length} miembros
                 </p>
               </div>
@@ -626,6 +628,7 @@ export const GroupDetailPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    maxLength={35}
                     value={editGroupName}
                     onChange={(e) => setEditGroupName(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
@@ -638,6 +641,7 @@ export const GroupDetailPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    maxLength={80}
                     value={editGroupDesc}
                     onChange={(e) => setEditGroupDesc(e.target.value)}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"

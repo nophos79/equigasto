@@ -117,9 +117,6 @@ export const GroupsPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Mis Grupos
           </h1>
-          <p className="text-sm text-slate-500">
-            Administra tus viajes, pisos compartidos y espacios personales.
-          </p>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -136,55 +133,71 @@ export const GroupsPage: React.FC = () => {
           const isIndividual = group.members.length === 1;
 
           return (
-            <Link key={group.id} to={`/groups/${group.id}`} className="group">
-              <Card hoverable className="h-full p-3.5 sm:p-4 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl p-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-                        {group.icon}
-                      </span>
-                      {isIndividual && (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/50">
-                          <User className="w-3 h-3" />
-                          Personal
-                        </span>
-                      )}
-                    </div>
-                    {!isIndividual && (
-                      <span className="text-[11px] font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {group.members.length} miembros
-                      </span>
-                    )}
+            <Link key={group.id} to={`/groups/${group.id}`} className="group block">
+              <Card hoverable className="p-3 sm:p-3.5 flex flex-col justify-between">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span className="text-2xl p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
+                      {group.icon}
+                    </span>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-brand-600 truncate min-w-0">
+                      {group.name}
+                    </h3>
                   </div>
-
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors truncate">
-                    {group.name}
-                  </h3>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                    {isIndividual ? 'Personal' : `${group.members.length} miembros`}
+                  </span>
                 </div>
 
-                <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-3">
-                  <span className="text-slate-400 font-medium">
-                    {isIndividual ? 'Balance:' : balanceCents > 0 ? 'Te deben:' : balanceCents < 0 ? 'Debes:' : 'Al día:'}
+                <div
+                  className={`mt-2.5 p-2 rounded-xl flex items-center justify-between border ${
+                    isIndividual
+                      ? 'bg-indigo-50/60 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50'
+                      : balanceCents > 0
+                      ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/50'
+                      : balanceCents < 0
+                      ? 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-100 dark:border-rose-900/50'
+                      : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'
+                  }`}
+                >
+                  <span
+                    className={`text-xs font-bold ${
+                      isIndividual
+                        ? 'text-indigo-800 dark:text-indigo-300'
+                        : balanceCents > 0
+                        ? 'text-emerald-800 dark:text-emerald-300'
+                        : balanceCents < 0
+                        ? 'text-rose-800 dark:text-rose-300'
+                        : 'text-slate-500 dark:text-slate-400'
+                    }`}
+                  >
+                    {isIndividual
+                      ? 'Balance'
+                      : balanceCents > 0
+                      ? 'Te deben'
+                      : balanceCents < 0
+                      ? 'Debes'
+                      : 'Al día'}
                   </span>
-                  {isIndividual ? (
-                    <span className={`text-sm font-bold ${balanceCents >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {formatCurrency(balanceCents, { showSign: true })}
-                    </span>
-                  ) : (
-                    <span
-                      className={`text-sm font-bold ${
-                        balanceCents > 0
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : balanceCents < 0
-                          ? 'text-rose-600 dark:text-rose-400'
-                          : 'text-slate-500'
-                      }`}
-                    >
-                      {balanceCents === 0 ? '0,00 €' : formatCurrency(Math.abs(balanceCents))}
-                    </span>
-                  )}
+                  <span
+                    className={`text-base sm:text-lg font-black ${
+                      isIndividual
+                        ? balanceCents >= 0
+                          ? 'text-indigo-900 dark:text-indigo-300'
+                          : 'text-rose-700 dark:text-rose-400'
+                        : balanceCents > 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : balanceCents < 0
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {isIndividual
+                      ? formatCurrency(balanceCents, { showSign: true })
+                      : balanceCents === 0
+                      ? '0,00 €'
+                      : (balanceCents > 0 ? '+' : '-') + formatCurrency(Math.abs(balanceCents))}
+                  </span>
                 </div>
               </Card>
             </Link>
@@ -271,6 +284,7 @@ export const GroupsPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  maxLength={35}
                   placeholder={groupType === 'INDIVIDUAL' ? 'Ej: Mis Gastos Diarios, Presupuesto Casa...' : 'Ej: Viaje a Roma, Gastos Casa...'}
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
@@ -282,6 +296,7 @@ export const GroupsPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Descripción opcional</label>
                 <input
                   type="text"
+                  maxLength={80}
                   placeholder={groupType === 'INDIVIDUAL' ? 'Ej: Control personal de compras y suscripciones' : 'Ej: Gastos de gasolina, cenas y entradas'}
                   value={newGroupDesc}
                   onChange={(e) => setNewGroupDesc(e.target.value)}
