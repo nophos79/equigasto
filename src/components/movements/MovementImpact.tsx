@@ -6,15 +6,14 @@ import { formatCurrency } from '../../core/money';
 interface MovementImpactProps {
   movement: Movement;
   userId?: string;
+  isSingleMemberGroup?: boolean;
 }
 
 /** Cuánto te deben o debes por un movimiento concreto. */
-export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId }) => {
-  if (!userId) return null;
+export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId, isSingleMemberGroup = false }) => {
+  if (!userId || isSingleMemberGroup) return null;
 
-  if (movement.type === 'INCOME') {
-    return <span className="text-xs text-emerald-600 font-semibold">+ {formatCurrency(movement.amountCents)} (Ingreso)</span>;
-  }
+  if (movement.type === 'INCOME') return null;
 
   const net = calculateMovementImpact(movement, userId);
 
@@ -24,9 +23,7 @@ export const MovementImpact: React.FC<MovementImpactProps> = ({ movement, userId
       movement.shares[0].userId === movement.paidById &&
       movement.paidById === userId;
 
-    if (isPersonal) {
-      return <span className="text-xs text-slate-500 font-semibold">Gasto personal</span>;
-    }
+    if (isPersonal) return null;
     return <span className="text-xs text-slate-400 font-medium">Sin saldo pendiente</span>;
   }
 

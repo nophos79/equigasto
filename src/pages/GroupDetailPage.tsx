@@ -320,58 +320,29 @@ export const GroupDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-slate-200 gap-2 sm:gap-6 overflow-x-auto pb-1 text-sm font-semibold">
-        <button
-          onClick={() => setActiveTab('movements')}
-          className={`pb-2.5 px-1 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'movements'
-              ? 'border-brand-600 text-brand-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
+      {/* Selector de Sección (Desplegable) */}
+      <div className="flex items-center gap-2 max-w-xs sm:max-w-sm">
+        <label htmlFor="group-section-select" className="text-xs font-bold text-slate-500 uppercase tracking-wider shrink-0">
+          Ver:
+        </label>
+        <select
+          id="group-section-select"
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value as any)}
+          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm font-bold shadow-xs focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer"
         >
-          Movimientos ({movements.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('balances')}
-          className={`pb-2.5 px-1 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'balances'
-              ? 'border-brand-600 text-brand-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
-        </button>
-        <button
-          onClick={() => setActiveTab('debts')}
-          className={`pb-2.5 px-1 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'debts'
-              ? 'border-brand-600 text-brand-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Deudas Simplificadas ({simplifiedDebts.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('settlements')}
-          className={`pb-2.5 px-1 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'settlements'
-              ? 'border-brand-600 text-brand-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Liquidaciones ({settlementMovements.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('config')}
-          className={`pb-2.5 px-1 border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === 'config'
-              ? 'border-brand-600 text-brand-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          Configuración
-        </button>
+          <option value="movements">Movimientos ({movements.length})</option>
+          {group.members.length > 1 && (
+            <>
+              <option value="balances">
+                Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
+              </option>
+              <option value="debts">Deudas Simplificadas ({simplifiedDebts.length})</option>
+              <option value="settlements">Liquidaciones ({settlementMovements.length})</option>
+            </>
+          )}
+          <option value="config">Configuración del grupo</option>
+        </select>
       </div>
 
       {/* TAB 1: MOVIMIENTOS */}
@@ -435,9 +406,9 @@ export const GroupDetailPage: React.FC = () => {
               </div>
             ) : (
               filteredMovements.map((mov) => {
+                const isSingleGroup = group.members.length === 1;
                 const payer = allUsers.find((u) => u.id === mov.paidById);
-                const isMe = mov.paidById === currentUser.id;
-                const payerName = isMe ? 'Tú' : (payer?.name.split(' ')[0] || 'Compañero');
+                const payerName = payer?.name.split(' ')[0] || currentUser.name.split(' ')[0] || 'Compañero';
                 const movDate = new Date(mov.date);
                 const monthStr = movDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
                 const dayStr = movDate.getDate();
@@ -446,14 +417,14 @@ export const GroupDetailPage: React.FC = () => {
                   <div
                     key={mov.id}
                     onClick={() => setSelectedMovement(mov)}
-                    className="py-2.5 px-3 sm:py-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
+                    className="py-2 px-2.5 sm:py-2.5 sm:px-3.5 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                   >
-                    {/* Fecha como primer dato en formato visible */}
-                    <div className="flex flex-col items-center justify-center w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                    {/* Fecha como primer dato en formato visible y compacto */}
+                    <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
                         {monthStr}
                       </span>
-                      <span className="text-base font-black text-slate-900 dark:text-white">
+                      <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                         {dayStr}
                       </span>
                     </div>
@@ -461,10 +432,10 @@ export const GroupDetailPage: React.FC = () => {
                     {/* Detalle del movimiento */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-xs">
+                        <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-xs">
                           {mov.concept}
                         </p>
-                        <Badge type={mov.type} />
+                        <Badge type={mov.type} isIndividual={isSingleGroup} />
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                         Pagó <span className="font-semibold text-slate-700 dark:text-slate-300">{payerName}</span>
@@ -473,10 +444,16 @@ export const GroupDetailPage: React.FC = () => {
 
                     {/* Importe e impacto económico */}
                     <div className="text-right shrink-0">
-                      <p className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
-                        {formatCurrency(mov.amountCents)}
+                      <p className={`text-base sm:text-lg font-black ${
+                        isSingleGroup && mov.type === 'INCOME'
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-slate-900 dark:text-white'
+                      }`}>
+                        {isSingleGroup && mov.type === 'INCOME' ? `+${formatCurrency(mov.amountCents)}` : formatCurrency(mov.amountCents)}
                       </p>
-                      <MovementImpact movement={mov} userId={currentUser?.id} />
+                      {!isSingleGroup && (
+                        <MovementImpact movement={mov} userId={currentUser?.id} isSingleMemberGroup={isSingleGroup} />
+                      )}
                     </div>
                   </div>
                 );

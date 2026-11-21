@@ -8,10 +8,13 @@ interface CardProps {
 }
 
 export const Card: React.FC<CardProps> = ({ children, className = '', onClick, hoverable = false }) => {
+  const hasPadding = /(^|\s)p[xytrbl]?-\d+/.test(className);
   return (
     <div
       onClick={onClick}
-      className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-3 sm:p-5 transition-all duration-200 text-slate-800 dark:text-slate-100 ${
+      className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm ${
+        hasPadding ? '' : 'p-3 sm:p-5'
+      } transition-all duration-200 text-slate-800 dark:text-slate-100 ${
         hoverable ? 'hover:shadow-md hover:border-slate-200 dark:hover:border-slate-700 cursor-pointer active:scale-[0.99]' : ''
       } ${className}`}
     >

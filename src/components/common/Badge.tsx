@@ -5,9 +5,10 @@ interface BadgeProps {
   type?: MovementType;
   variant?: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
   children?: React.ReactNode;
+  isIndividual?: boolean;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ type, variant, children }) => {
+export const Badge: React.FC<BadgeProps> = ({ type, variant, children, isIndividual = false }) => {
   if (type) {
     const config: Record<MovementType, { label: string; bg: string }> = {
       SHARED_EXPENSE: {
@@ -32,7 +33,13 @@ export const Badge: React.FC<BadgeProps> = ({ type, variant, children }) => {
       },
     };
 
-    const current = config[type] || config.SHARED_EXPENSE;
+    let current = config[type] || config.SHARED_EXPENSE;
+    if (isIndividual && (type === 'SHARED_EXPENSE' || type === 'INDIVIDUAL_EXPENSE')) {
+      current = {
+        label: 'Gasto',
+        bg: 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
+      };
+    }
 
     return (
       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${current.bg}`}>

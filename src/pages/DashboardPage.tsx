@@ -309,34 +309,58 @@ export const DashboardPage: React.FC = () => {
           ) : (
             recentMovements.map((mov) => {
               const group = groups.find((g) => g.id === mov.groupId);
+              const isSingleGroup = group?.members.length === 1;
+              const payer = allUsers.find((u) => u.id === mov.paidById);
+              const payerName = payer?.name.split(' ')[0] || currentUser.name.split(' ')[0] || 'Compañero';
+              const movDate = new Date(mov.date);
+              const monthStr = movDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+              const dayStr = movDate.getDate();
 
               return (
                 <div
                   key={mov.id}
                   onClick={() => setSelectedMovement(mov)}
-                  className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
+                  className="py-2 px-2.5 sm:py-2.5 sm:px-3.5 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                 >
-                  <div className="min-w-0 pr-3">
+                  {/* Fecha como primer dato en formato visible */}
+                  <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
+                    <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                      {monthStr}
+                    </span>
+                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                      {dayStr}
+                    </span>
+                  </div>
+
+                  {/* Detalle del movimiento */}
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                      <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-xs">
                         {mov.concept}
                       </p>
-                      <Badge type={mov.type} />
+                      <Badge type={mov.type} isIndividual={isSingleGroup} />
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      <span className="truncate max-w-[120px] font-medium text-slate-600 dark:text-slate-300">
+                      <span className="truncate max-w-[130px] font-medium text-slate-600 dark:text-slate-300">
                         {group?.icon} {group?.name}
                       </span>
                       <span>·</span>
-                      <span>{new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                      <span>Pagó <strong className="font-semibold text-slate-700 dark:text-slate-300">{payerName}</strong></span>
                     </div>
                   </div>
 
+                  {/* Importe e impacto económico */}
                   <div className="text-right shrink-0">
-                    <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
-                      {formatCurrency(mov.amountCents)}
+                    <p className={`text-base sm:text-lg font-black ${
+                      isSingleGroup && mov.type === 'INCOME'
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-slate-900 dark:text-white'
+                    }`}>
+                      {isSingleGroup && mov.type === 'INCOME' ? `+${formatCurrency(mov.amountCents)}` : formatCurrency(mov.amountCents)}
                     </p>
-                    <MovementImpact movement={mov} userId={currentUser?.id} />
+                    {!isSingleGroup && (
+                      <MovementImpact movement={mov} userId={currentUser?.id} isSingleMemberGroup={isSingleGroup} />
+                    )}
                   </div>
                 </div>
               );
