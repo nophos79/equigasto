@@ -93,7 +93,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ onSignOut }) => {
           onOpenNewMovement={() => setIsNewMovementOpen(true)}
         />
 
-        <main className="flex-1 pb-20 lg:pb-8 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 pb-20 lg:pb-8 px-2.5 py-3 sm:px-6 sm:py-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet context={{ refreshTrigger, triggerRefresh: () => setRefreshTrigger(p => p + 1) }} />
         </main>
 

@@ -218,7 +218,7 @@ export const GroupDetailPage: React.FC = () => {
           <span>Volver a Mis Grupos</span>
         </Link>
 
-        <div className="bg-white rounded-3xl border border-slate-100 p-5 sm:p-6 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-100 dark:border-slate-800 p-3.5 sm:p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <span className="text-4xl p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">

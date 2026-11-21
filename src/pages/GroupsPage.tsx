@@ -144,7 +144,7 @@ export const GroupsPage: React.FC = () => {
                       {group.name}
                     </h3>
                   </div>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
                     {isIndividual ? 'Personal' : `${group.members.length} miembros`}
                   </span>
                 </div>
@@ -161,7 +161,7 @@ export const GroupsPage: React.FC = () => {
                   }`}
                 >
                   <span
-                    className={`text-xs font-bold ${
+                    className={`text-sm font-bold ${
                       isIndividual
                         ? 'text-indigo-800 dark:text-indigo-300'
                         : balanceCents > 0

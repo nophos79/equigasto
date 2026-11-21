@@ -168,7 +168,7 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* Total Ingresos */}
         <div className="p-2.5 sm:p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 text-center">
-          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 block truncate">
+          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block truncate uppercase">
             Ingresos
           </span>
           <p className="text-base sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 truncate">
@@ -178,7 +178,7 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
 
         {/* Total Gastos */}
         <div className="p-2.5 sm:p-3.5 bg-rose-50/70 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-center">
-          <span className="text-[11px] sm:text-xs font-bold text-rose-800 dark:text-rose-300 block truncate">
+          <span className="text-xs font-bold text-rose-800 dark:text-rose-300 block truncate uppercase">
             Gastos
           </span>
           <p className="text-base sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 truncate">
@@ -188,7 +188,7 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
 
         {/* Balance / Ahorro Neto */}
         <div className="p-2.5 sm:p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 text-center">
-          <span className="text-[11px] sm:text-xs font-bold text-indigo-800 dark:text-indigo-300 block truncate">
+          <span className="text-xs font-bold text-indigo-800 dark:text-indigo-300 block truncate uppercase">
             Balance
           </span>
           <p
@@ -216,10 +216,10 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
                   {group.icon}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
                     {group.name}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-xs text-slate-400">
                     {count} {count === 1 ? 'movimiento' : 'movimientos'}
                   </p>
                 </div>
@@ -227,11 +227,11 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
               <div className="text-right shrink-0 flex items-center gap-1.5 pl-2">
                 <div className="text-right">
                   {incomes > 0 && (
-                    <span className="text-[10px] font-bold text-emerald-600 block">
+                    <span className="text-xs font-bold text-emerald-600 block">
                       +{formatCurrency(incomes)}
                     </span>
                   )}
-                  <span className="text-xs font-extrabold text-slate-900 dark:text-white block">
+                  <span className="text-sm font-extrabold text-slate-900 dark:text-white block">
                     {expenses > 0 ? `-${formatCurrency(expenses)}` : '0,00 €'}
                   </span>
                 </div>

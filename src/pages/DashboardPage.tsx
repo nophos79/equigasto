@@ -22,18 +22,16 @@ export const DashboardPage: React.FC = () => {
   const [groupBalances, setGroupBalances] = useState<Record<string, number>>({});
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [allMovements, setAllMovements] = useState<Movement[]>([]);
-  const [overall, setOverall] = useState({ totalOwedCents: 0, totalOwesCents: 0, netCents: 0 });
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
-  interface DebtDetail {
+  interface UserConsolidatedDebt {
+  userId: string;
   userName: string;
   amountCents: number;
-  groupName: string;
-  groupIcon: string;
 }
 
-  const [debtsToMe, setDebtsToMe] = useState<DebtDetail[]>([]);
-  const [debtsIOwe, setDebtsIOwe] = useState<DebtDetail[]>([]);
+  const [peopleWhoOweMe, setPeopleWhoOweMe] = useState<UserConsolidatedDebt[]>([]);
+  const [peopleIOwe, setPeopleIOwe] = useState<UserConsolidatedDebt[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -42,7 +40,6 @@ export const DashboardPage: React.FC = () => {
     const users = await repository.getUsers();
     const grps = await repository.getGroups();
     const movs = await repository.getMovements();
-    const stats = await repository.getUserOverallBalance(user.id);
 
     // Balances individuales en cada grupo para el usuario actual
     const balancesMap: Record<string, number> = {};
@@ -64,39 +61,54 @@ export const DashboardPage: React.FC = () => {
     setGroups(grps);
     setAllMovements(movs);
     setRecentMovements(movs.slice(0, 5));
-    // Deudas simplificadas para el usuario actual
-    const toMe: DebtDetail[] = [];
-    const iOwe: DebtDetail[] = [];
+    // Balances acumulados por persona en todos los grupos
+    const userNetMap: Record<string, { name: string; netCents: number }> = {};
     for (const g of grps) {
       if (g.members.length > 1) {
         try {
           const debts = await repository.getGroupDebts(g.id);
           for (const d of debts) {
             if (d.toUserId === user.id) {
-              const other = users.find((u) => u.id === d.fromUserId);
-              toMe.push({
-                userName: other?.name || 'Compañero',
-                amountCents: d.amountCents,
-                groupName: g.name,
-                groupIcon: g.icon,
-              });
+              if (!userNetMap[d.fromUserId]) {
+                const other = users.find((u) => u.id === d.fromUserId);
+                userNetMap[d.fromUserId] = { name: other?.name || 'Compañero', netCents: 0 };
+              }
+              userNetMap[d.fromUserId].netCents += d.amountCents;
             } else if (d.fromUserId === user.id) {
-              const other = users.find((u) => u.id === d.toUserId);
-              iOwe.push({
-                userName: other?.name || 'Compañero',
-                amountCents: d.amountCents,
-                groupName: g.name,
-                groupIcon: g.icon,
-              });
+              if (!userNetMap[d.toUserId]) {
+                const other = users.find((u) => u.id === d.toUserId);
+                userNetMap[d.toUserId] = { name: other?.name || 'Compañero', netCents: 0 };
+              }
+              userNetMap[d.toUserId].netCents -= d.amountCents;
             }
           }
         } catch (e) {}
       }
     }
-    setDebtsToMe(toMe);
-    setDebtsIOwe(iOwe);
 
-    setOverall(stats);
+    const whoOwes: UserConsolidatedDebt[] = [];
+    const whoIOweList: UserConsolidatedDebt[] = [];
+    for (const [otherId, item] of Object.entries(userNetMap)) {
+      if (item.netCents > 0) {
+        whoOwes.push({
+          userId: otherId,
+          userName: item.name,
+          amountCents: item.netCents,
+        });
+      } else if (item.netCents < 0) {
+        whoIOweList.push({
+          userId: otherId,
+          userName: item.name,
+          amountCents: Math.abs(item.netCents),
+        });
+      }
+    }
+    whoOwes.sort((a, b) => b.amountCents - a.amountCents);
+    whoIOweList.sort((a, b) => b.amountCents - a.amountCents);
+
+    setPeopleWhoOweMe(whoOwes);
+    setPeopleIOwe(whoIOweList);
+
     setGroupBalances(balancesMap);
     setLoading(false);
   };
@@ -114,109 +126,70 @@ export const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-200">
       {/* Saludo y Resumen Financiero */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Hola, {currentUser.name.split(' ')[0]} 👋
             </h1>
-            <p className="text-xs text-slate-500">Estado de tus cuentas y grupos.</p>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Estado de tus cuentas y grupos.</p>
           </div>
         </div>
 
-        {/* Resumen Compacto: 3 Columnas sin textos sobrantes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          {/* Te deben */}
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 text-center">
-            <span className="text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide block truncate">
-              Te deben
-            </span>
-            <p className="text-base sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 truncate">
-              {formatCurrency(overall.totalOwedCents)}
-            </p>
+        {/* Balances Acumulados por Persona: Cuadro Verde y Cuadro Rojo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+          {/* Cuadro Verde: Personas que te deben */}
+          <div className="p-3.5 sm:p-4 bg-emerald-50/80 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/50 shadow-xs">
+            {peopleWhoOweMe.length === 0 ? (
+              <p className="text-sm font-semibold text-emerald-800/80 dark:text-emerald-300/80 text-center py-2">
+                Nadie te debe dinero
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {peopleWhoOweMe.map((p) => (
+                  <div
+                    key={p.userId}
+                    className="flex items-center justify-between text-sm sm:text-base py-1 border-b border-emerald-100/70 dark:border-emerald-900/30 last:border-0"
+                  >
+                    <span className="font-semibold text-slate-800 dark:text-slate-100 truncate mr-2">
+                      <strong className="text-slate-900 dark:text-white font-bold">{p.userName}</strong> te debe
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 shrink-0">
+                      {formatCurrency(p.amountCents)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Debes */}
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/40 text-center">
-            <span className="text-[11px] sm:text-xs font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wide block truncate">
-              Debes
-            </span>
-            <p className="text-base sm:text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5 truncate">
-              {formatCurrency(overall.totalOwesCents)}
-            </p>
-          </div>
-
-          {/* Balance global */}
-          <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-            <span className="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block truncate">
-              Balance global
-            </span>
-            <p
-              className={`text-base sm:text-2xl font-black mt-0.5 truncate ${
-                overall.netCents > 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : overall.netCents < 0
-                  ? 'text-rose-600 dark:text-rose-400'
-                  : 'text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              {formatCurrency(overall.netCents, { showSign: true })}
-            </p>
+          {/* Cuadro Rojo: Personas a las que debes */}
+          <div className="p-3.5 sm:p-4 bg-rose-50/80 dark:bg-rose-950/40 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 shadow-xs">
+            {peopleIOwe.length === 0 ? (
+              <p className="text-sm font-semibold text-rose-800/80 dark:text-rose-300/80 text-center py-2">
+                No debes dinero a nadie
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {peopleIOwe.map((p) => (
+                  <div
+                    key={p.userId}
+                    className="flex items-center justify-between text-sm sm:text-base py-1 border-b border-rose-100/70 dark:border-rose-900/30 last:border-0"
+                  >
+                    <span className="font-semibold text-slate-800 dark:text-slate-100 truncate mr-2">
+                      Debes a <strong className="text-slate-900 dark:text-white font-bold">{p.userName}</strong>
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-rose-600 dark:text-rose-400 shrink-0">
+                      {formatCurrency(p.amountCents)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Deudas Simplificadas: ¿A quién debo y quién me debe? */}
-        {(debtsToMe.length > 0 || debtsIOwe.length > 0) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-            {/* Quién me debe */}
-            <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/40">
-              <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide block mb-1.5">
-                Te deben directamente
-              </span>
-              {debtsToMe.length === 0 ? (
-                <p className="text-xs text-slate-400">Nadie te debe dinero.</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {debtsToMe.map((d, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs py-0.5">
-                      <span className="text-slate-800 dark:text-slate-200 font-medium truncate mr-2">
-                        <strong className="font-bold">{d.userName}</strong> te debe <span className="text-[11px] text-slate-400 font-normal">({d.groupIcon} {d.groupName})</span>
-                      </span>
-                      <span className="font-black text-emerald-600 dark:text-emerald-400 shrink-0">
-                        +{formatCurrency(d.amountCents)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* A quién debo */}
-            <div className="p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900/40">
-              <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wide block mb-1.5">
-                Debes directamente
-              </span>
-              {debtsIOwe.length === 0 ? (
-                <p className="text-xs text-slate-400">No debes nada a nadie.</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {debtsIOwe.map((d, i) => (
-                    <div key={i} className="flex items-center justify-between text-xs py-0.5">
-                      <span className="text-slate-800 dark:text-slate-200 font-medium truncate mr-2">
-                        Debes a <strong className="font-bold">{d.userName}</strong> <span className="text-[11px] text-slate-400 font-normal">({d.groupIcon} {d.groupName})</span>
-                      </span>
-                      <span className="font-black text-rose-600 dark:text-rose-400 shrink-0">
-                        -{formatCurrency(d.amountCents)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Mis Grupos */}
@@ -251,7 +224,7 @@ export const DashboardPage: React.FC = () => {
                         {group.name}
                       </h3>
                     </div>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
                       {isIndividual ? 'Personal' : `${group.members.length} miembros`}
                     </span>
                   </div>
@@ -268,7 +241,7 @@ export const DashboardPage: React.FC = () => {
                     }`}
                   >
                     <span
-                      className={`text-xs font-bold ${
+                      className={`text-sm font-bold ${
                         isIndividual
                           ? 'text-indigo-800 dark:text-indigo-300'
                           : balanceCents > 0
@@ -345,12 +318,12 @@ export const DashboardPage: React.FC = () => {
                 >
                   <div className="min-w-0 pr-3">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                      <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
                         {mov.concept}
                       </p>
                       <Badge type={mov.type} />
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       <span className="truncate max-w-[120px] font-medium text-slate-600 dark:text-slate-300">
                         {group?.icon} {group?.name}
                       </span>
