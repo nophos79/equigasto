@@ -220,7 +220,7 @@ export const DashboardPage: React.FC = () => {
                       <span className="text-2xl p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
                         {group.icon}
                       </span>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-brand-600 truncate min-w-0">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg group-hover:text-brand-600 truncate min-w-0">
                         {group.name}
                       </h3>
                     </div>
@@ -241,7 +241,7 @@ export const DashboardPage: React.FC = () => {
                     }`}
                   >
                     <span
-                      className={`text-sm font-bold ${
+                      className={`text-sm sm:text-base font-bold ${
                         isIndividual
                           ? 'text-indigo-800 dark:text-indigo-300'
                           : balanceCents > 0
@@ -324,10 +324,10 @@ export const DashboardPage: React.FC = () => {
                 >
                   {/* Fecha como primer dato en formato visible */}
                   <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
-                    <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
                       {monthStr}
                     </span>
-                    <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                    <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                       {dayStr}
                     </span>
                   </div>

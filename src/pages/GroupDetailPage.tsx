@@ -231,26 +231,26 @@ export const GroupDetailPage: React.FC = () => {
         </Link>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
-          {/* Fila superior: Icono + Nombre + Badges */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-2xl sm:text-3xl p-2 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
-              {group.icon}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 min-w-0">
+          {/* Fila superior: Icono + Nombre a la izquierda, Tag a la derecha */}
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <span className="text-2xl sm:text-3xl p-1.5 sm:p-2 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
+                {group.icon}
+              </span>
+              <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
                   {group.name}
                 </h1>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
-                  {group.members.length === 1 ? 'Personal' : `${group.members.length} miembros`}
-                </span>
+                {group.description && (
+                  <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
+                    {group.description}
+                  </p>
+                )}
               </div>
-              {group.description && (
-                <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
-                  {group.description}
-                </p>
-              )}
             </div>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+              {group.members.length === 1 ? 'Personal' : `${group.members.length} miembros`}
+            </span>
           </div>
 
           {/* Fila inferior: Píldora de saldo debajo del grupo */}
@@ -266,7 +266,7 @@ export const GroupDetailPage: React.FC = () => {
             }`}
           >
             <span
-              className={`text-sm font-bold ${
+              className={`text-sm sm:text-base font-bold ${
                 group.members.length === 1
                   ? 'text-indigo-800 dark:text-indigo-300'
                   : (currentUserBalance?.netBalanceCents || 0) > 0
@@ -435,10 +435,10 @@ export const GroupDetailPage: React.FC = () => {
                   >
                     {/* Fecha como primer dato en formato visible y compacto */}
                     <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
-                      <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
                         {monthStr}
                       </span>
-                      <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                      <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                         {dayStr}
                       </span>
                     </div>

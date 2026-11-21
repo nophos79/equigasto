@@ -169,10 +169,10 @@ export const ActivityPage: React.FC = () => {
               >
                 {/* Fecha como primer dato en formato visible */}
                 <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
-                  <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
                     {monthStr}
                   </span>
-                  <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                  <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     {dayStr}
                   </span>
                 </div>
