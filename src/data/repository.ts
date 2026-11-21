@@ -2,6 +2,7 @@ import type { Group, Movement, UserProfile, MemberBalance, SimplifiedDebt } from
 
 export interface IDataRepository {
   getCurrentUser(): Promise<UserProfile>;
+  updateProfile(data: { name?: string; avatarUrl?: string }): Promise<UserProfile>;
   getUsers(): Promise<UserProfile[]>;
   getUserById(id: string): Promise<UserProfile | undefined>;
   

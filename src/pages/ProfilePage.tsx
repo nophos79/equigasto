@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
+import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2, KeyRound, Eye, EyeOff, AlertCircle, Pencil, Check, X } from 'lucide-react';
 import { repository } from '../data/index';
 import { supabase } from '../data/supabaseClient';
 import { UserProfile } from '../core/types';
@@ -12,11 +13,18 @@ interface ProfilePageProps {
 }
 
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
+  const { triggerRefresh } = useOutletContext<{ triggerRefresh?: () => void }>() || {};
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
   const [loadingPending, setLoadingPending] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Estados para edición de nombre de usuario
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [nameLoading, setNameLoading] = useState(false);
+  const [nameFeedback, setNameFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Estados para cambio de contraseña
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -29,6 +37,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
   useEffect(() => {
     repository.getCurrentUser().then((user) => {
       setCurrentUser(user);
+      setEditName(user.name);
       if (user.isAdmin) {
         loadPendingUsers();
       }
@@ -76,6 +85,42 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const handleUpdateName = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const trimmed = editName.trim();
+    if (!trimmed) {
+      setNameFeedback({ type: 'error', message: 'El nombre no puede estar vacío.' });
+      return;
+    }
+    if (currentUser && trimmed === currentUser.name) {
+      setIsEditingName(false);
+      return;
+    }
+    setNameLoading(true);
+    setNameFeedback(null);
+    try {
+      const updated = await repository.updateProfile({ name: trimmed });
+      setCurrentUser(updated);
+      setIsEditingName(false);
+      setNameFeedback({ type: 'success', message: 'Nombre actualizado correctamente.' });
+      triggerRefresh?.();
+      setTimeout(() => setNameFeedback(null), 3000);
+    } catch (err) {
+      setNameFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Error al actualizar el nombre.',
+      });
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    if (currentUser) setEditName(currentUser.name);
+    setNameFeedback(null);
   };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -126,14 +171,69 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
       <Card className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
         <Avatar name={currentUser.name} url={currentUser.avatarUrl} size="xl" />
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">{currentUser.name}</h2>
-            {currentUser.isAdmin && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 rounded-full border border-amber-300 dark:border-amber-800/80 self-center sm:self-auto">
-                <Shield className="w-3 h-3" /> Administrador
-              </span>
-            )}
-          </div>
+          {isEditingName ? (
+            <form onSubmit={handleUpdateName} className="flex flex-col sm:flex-row items-center gap-2 mt-0.5">
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                maxLength={40}
+                disabled={nameLoading}
+                autoFocus
+                placeholder="Tu nombre"
+                className="w-full sm:w-auto flex-1 px-3 py-1 text-sm font-semibold rounded-xl border border-brand-300 dark:border-brand-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+              <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                <button
+                  type="submit"
+                  disabled={nameLoading || !editName.trim()}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                  title="Guardar nombre"
+                >
+                  {nameLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Guardar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEditName}
+                  disabled={nameLoading}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold transition"
+                  title="Cancelar"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Cancelar</span>
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{currentUser.name}</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditName(currentUser.name);
+                    setIsEditingName(true);
+                  }}
+                  className="p-1 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                  title="Modificar nombre"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+              {currentUser.isAdmin && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 rounded-full border border-amber-300 dark:border-amber-800/80 self-center sm:self-auto">
+                  <Shield className="w-3 h-3" /> Administrador
+                </span>
+              )}
+            </div>
+          )}
+          {nameFeedback && (
+            <div className={`mt-2 text-xs flex items-center justify-center sm:justify-start gap-1.5 ${nameFeedback.type === 'success' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              {nameFeedback.type === 'success' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+              <span>{nameFeedback.message}</span>
+            </div>
+          )}
           <p className="text-xs text-slate-400 mt-0.5">{currentUser.email}</p>
           <div className="mt-3 flex items-center justify-center sm:justify-start gap-2 flex-wrap">
             <span className="text-xs px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold rounded-full border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1">

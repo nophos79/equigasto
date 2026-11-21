@@ -29,6 +29,39 @@ export class SupabaseRepository implements IDataRepository {
     };
   }
 
+  async updateProfile(data: { name?: string; avatarUrl?: string }): Promise<UserProfile> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('No hay sesión activa.');
+
+    const updates: Record<string, any> = {};
+    if (data.name !== undefined) updates.name = data.name.trim();
+    if (data.avatarUrl !== undefined) updates.avatar_url = data.avatarUrl;
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('auth_user_id', user.id)
+      .select('*')
+      .single();
+
+    if (error) throw new Error('Error al actualizar el perfil: ' + error.message);
+
+    // Actualizar también en auth metadata si se cambió el nombre
+    if (data.name !== undefined) {
+      await supabase.auth.updateUser({ data: { name: data.name.trim() } }).catch(() => {});
+    }
+
+    return {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      avatarUrl: profile.avatar_url,
+      isApproved: profile.is_approved ?? true,
+      isAdmin: profile.is_admin ?? false,
+      createdAt: profile.created_at,
+    };
+  }
+
   async getUsers(): Promise<UserProfile[]> {
     const { data, error } = await supabase.from('profiles').select('*');
     if (error || !data) return [];
