@@ -132,16 +132,26 @@ export const GroupDetailPage: React.FC = () => {
   }
 
   // Filtrado de movimientos
-  const filteredMovements = movements.filter((m) => {
-    if (typeFilter !== 'ALL' && m.type !== typeFilter) return false;
-    if (memberFilter !== 'ALL') {
-      const isPayer = m.paidById === memberFilter;
-      const isRecipient = m.recipientId === memberFilter;
-      const isShareMember = m.shares.some((s) => s.userId === memberFilter);
-      if (!isPayer && !isRecipient && !isShareMember) return false;
-    }
-    return true;
-  });
+  const filteredMovements = movements
+    .filter((m) => {
+      if (typeFilter !== 'ALL' && m.type !== typeFilter) return false;
+      if (memberFilter !== 'ALL') {
+        const isPayer = m.paidById === memberFilter;
+        const isRecipient = m.recipientId === memberFilter;
+        const isShareMember = m.shares.some((s) => s.userId === memberFilter);
+        if (!isPayer && !isRecipient && !isShareMember) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateB !== dateA) return dateB - dateA;
+      // En un mismo día: orden de grabación (created_at más reciente primero)
+      const createdA = new Date(a.createdAt || a.date).getTime();
+      const createdB = new Date(b.createdAt || b.date).getTime();
+      return createdB - createdA;
+    });
 
   const settlementMovements = movements.filter((m) => m.type === 'SETTLEMENT');
   const currentUserBalance = balances.find((b) => b.userId === currentUser.id);
@@ -218,56 +228,93 @@ export const GroupDetailPage: React.FC = () => {
           <span>Volver a Mis Grupos</span>
         </Link>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-100 dark:border-slate-800 p-3.5 sm:p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
-              <span className="text-4xl p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
+          {/* Fila superior: Icono + Nombre + Badges + Botón Añadir */}
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <span className="text-2xl sm:text-3xl p-2 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
                 {group.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight break-all line-clamp-2">
-                  {group.name}
-                </h1>
-                <p className="text-xs text-slate-500 mt-0.5 break-all line-clamp-2">
-                  {group.description || 'Sin descripción'} • {group.members.length} miembros
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight break-all line-clamp-1">
+                    {group.name}
+                  </h1>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                    {group.members.length === 1 ? 'Personal' : `${group.members.length} miembros`}
+                  </span>
+                </div>
+                {group.description && (
+                  <p className="text-xs text-slate-500 mt-0.5 break-all line-clamp-1">
+                    {group.description}
+                  </p>
+                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 self-end sm:self-auto">
-              <button
-                onClick={() => {
-                  setPrefillSettlement(null);
-                  setMovementToEdit(null);
-                  setIsNewMovementModalOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Añadir gasto</span>
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setPrefillSettlement(null);
+                setMovementToEdit(null);
+                setIsNewMovementModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Añadir gasto</span>
+            </button>
           </div>
 
-          {/* Banner de Saldo del Usuario en el Grupo */}
-          <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-medium text-slate-500">
-              Tu situación económica en este grupo:
-            </span>
+          {/* Fila inferior: Píldora de saldo idéntica a las tarjetas de inicio */}
+          <div
+            className={`mt-2.5 p-2.5 sm:p-3 rounded-xl flex items-center justify-between border ${
+              group.members.length === 1
+                ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60'
+                : (currentUserBalance?.netBalanceCents || 0) > 0
+                ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+                : (currentUserBalance?.netBalanceCents || 0) < 0
+                ? 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'
+                : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+            }`}
+          >
             <span
-              className={`text-base sm:text-lg font-black ${
-                (currentUserBalance?.netBalanceCents || 0) > 0
-                  ? 'text-emerald-600'
+              className={`text-sm font-bold ${
+                group.members.length === 1
+                  ? 'text-indigo-800 dark:text-indigo-300'
+                  : (currentUserBalance?.netBalanceCents || 0) > 0
+                  ? 'text-emerald-800 dark:text-emerald-300'
                   : (currentUserBalance?.netBalanceCents || 0) < 0
-                  ? 'text-rose-600'
-                  : 'text-slate-600'
+                  ? 'text-rose-800 dark:text-rose-300'
+                  : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              {(currentUserBalance?.netBalanceCents || 0) > 0
-                ? `Te deben ${formatCurrency(currentUserBalance?.netBalanceCents || 0)}`
+              {group.members.length === 1
+                ? 'Balance'
+                : (currentUserBalance?.netBalanceCents || 0) > 0
+                ? 'Te deben'
                 : (currentUserBalance?.netBalanceCents || 0) < 0
-                ? `Debes ${formatCurrency(Math.abs(currentUserBalance?.netBalanceCents || 0))}`
-                : 'Estás al día (0,00 €)'}
+                ? 'Debes'
+                : 'Al día'}
+            </span>
+            <span
+              className={`text-lg sm:text-xl font-black ${
+                group.members.length === 1
+                  ? (currentUserBalance?.netBalanceCents || 0) >= 0
+                    ? 'text-indigo-900 dark:text-indigo-200'
+                    : 'text-rose-700 dark:text-rose-400'
+                  : (currentUserBalance?.netBalanceCents || 0) > 0
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : (currentUserBalance?.netBalanceCents || 0) < 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {group.members.length === 1
+                ? formatCurrency(currentUserBalance?.netBalanceCents || 0, { showSign: true })
+                : (currentUserBalance?.netBalanceCents || 0) === 0
+                ? '0,00 €'
+                : ((currentUserBalance?.netBalanceCents || 0) > 0 ? '+' : '-') +
+                  formatCurrency(Math.abs(currentUserBalance?.netBalanceCents || 0))}
             </span>
           </div>
         </div>
@@ -388,27 +435,45 @@ export const GroupDetailPage: React.FC = () => {
               </div>
             ) : (
               filteredMovements.map((mov) => {
-                
+                const payer = allUsers.find((u) => u.id === mov.paidById);
+                const isMe = mov.paidById === currentUser.id;
+                const payerName = isMe ? 'Tú' : (payer?.name.split(' ')[0] || 'Compañero');
+                const movDate = new Date(mov.date);
+                const monthStr = movDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+                const dayStr = movDate.getDate();
+
                 return (
                   <div
                     key={mov.id}
                     onClick={() => setSelectedMovement(mov)}
-                    className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
+                    className="py-2.5 px-3 sm:py-3 sm:px-4 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                   >
-                    <div className="min-w-0 pr-3">
+                    {/* Fecha como primer dato en formato visible */}
+                    <div className="flex flex-col items-center justify-center w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                        {monthStr}
+                      </span>
+                      <span className="text-base font-black text-slate-900 dark:text-white">
+                        {dayStr}
+                      </span>
+                    </div>
+
+                    {/* Detalle del movimiento */}
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-xs">
                           {mov.concept}
                         </p>
                         <Badge type={mov.type} />
                       </div>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                        {new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        Pagó <span className="font-semibold text-slate-700 dark:text-slate-300">{payerName}</span>
                       </p>
                     </div>
 
+                    {/* Importe e impacto económico */}
                     <div className="text-right shrink-0">
-                      <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
+                      <p className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
                         {formatCurrency(mov.amountCents)}
                       </p>
                       <MovementImpact movement={mov} userId={currentUser?.id} />

@@ -188,10 +188,10 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in duration-150">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
               {isEditing ? 'Editar Movimiento' : 'Registrar Movimiento'}
@@ -209,7 +209,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
         </div>
 
         {/* Tipo de movimiento selector */}
-        {!isEditing && isSingleMemberGroup ? (
+        {isSingleMemberGroup ? (
           <div className="p-3 bg-indigo-50/50 dark:bg-indigo-950/40 border-b border-indigo-100 dark:border-indigo-900/50 grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -236,7 +236,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
               <span>Ingreso</span>
             </button>
           </div>
-        ) : !isEditing && (
+        ) : (
           <div className="p-4 bg-slate-50/70 dark:bg-slate-950/60 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               type="button"
@@ -293,7 +293,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
         )}
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 overscroll-contain">
           {/* Grupo */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Grupo</label>
@@ -484,7 +484,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           </div>
 
           {/* Botones de acción */}
-          <div className="pt-2 flex gap-3">
+          <div className="pt-3 pb-1 sticky bottom-0 bg-white dark:bg-slate-900 flex gap-3">
             <button
               type="button"
               onClick={onClose}

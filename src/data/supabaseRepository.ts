@@ -185,7 +185,11 @@ export class SupabaseRepository implements IDataRepository {
   }
 
   async getMovements(groupId?: string): Promise<Movement[]> {
-    let query = supabase.from('movements').select('*, movement_shares(*)').order('date', { ascending: false });
+    let query = supabase
+      .from('movements')
+      .select('*, movement_shares(*)')
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false });
     if (groupId) {
       query = query.eq('group_id', groupId);
     }

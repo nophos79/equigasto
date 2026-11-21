@@ -58,7 +58,12 @@ export const ActivityPage: React.FC = () => {
     .sort((a, b) => {
       const timeA = new Date(a.date).getTime();
       const timeB = new Date(b.date).getTime();
-      return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+      if (timeB !== timeA) {
+        return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+      }
+      const cA = new Date(a.createdAt || a.date).getTime();
+      const cB = new Date(b.createdAt || b.date).getTime();
+      return sortOrder === 'desc' ? cB - cA : cA - cB;
     });
 
   return (

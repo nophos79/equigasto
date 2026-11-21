@@ -169,7 +169,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-3.5 sm:p-4 bg-rose-50/80 dark:bg-rose-950/40 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 shadow-xs">
             {peopleIOwe.length === 0 ? (
               <p className="text-sm font-semibold text-rose-800/80 dark:text-rose-300/80 text-center py-2">
-                No debes dinero a nadie
+                No debes nada
               </p>
             ) : (
               <div className="space-y-2">

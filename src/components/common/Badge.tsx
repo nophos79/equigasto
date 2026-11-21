@@ -11,7 +11,7 @@ export const Badge: React.FC<BadgeProps> = ({ type, variant, children }) => {
   if (type) {
     const config: Record<MovementType, { label: string; bg: string }> = {
       SHARED_EXPENSE: {
-        label: 'Gasto Compartido',
+        label: 'Compartido',
         bg: 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60',
       },
       INDIVIDUAL_EXPENSE: {
