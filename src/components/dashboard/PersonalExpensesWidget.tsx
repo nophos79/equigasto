@@ -139,9 +139,7 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
                 Individual
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Ingresos y gastos propios.
-            </p>
+
           </div>
         </div>
 

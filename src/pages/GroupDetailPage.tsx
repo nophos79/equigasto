@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  Scale,
   Plus,
-  Filter,
   CheckCircle2,
   UserPlus,
   Save,
@@ -348,54 +346,51 @@ export const GroupDetailPage: React.FC = () => {
       {/* TAB 1: MOVIMIENTOS */}
       {activeTab === 'movements' && (
         <div className="space-y-4">
-          {/* Filtros avanzados */}
-          <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center justify-between bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5" /> Tipo:
-              </span>
-              {(group.members.length === 1 ? ['ALL', 'SHARED_EXPENSE', 'INCOME'] : ['ALL', 'SHARED_EXPENSE', 'INDIVIDUAL_EXPENSE', 'LOAN', 'SETTLEMENT']).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTypeFilter(t)}
-                  className={`text-xs px-2.5 py-1 rounded-full font-medium transition-colors whitespace-nowrap ${
-                    typeFilter === t
-                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                      : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {t === 'ALL'
-                    ? 'Todos'
-                    : t === 'SHARED_EXPENSE'
-                    ? (group.members.length === 1 ? 'Gastos' : 'Compartidos')
-                    : t === 'INDIVIDUAL_EXPENSE'
-                    ? 'Adelantos'
-                    : t === 'LOAN'
-                    ? 'Préstamos'
-                    : t === 'SETTLEMENT' ? 'Liquidaciones' : 'Ingresos'}
-                </button>
-              ))}
+          {/* Filtros en desplegables */}
+          <div className="flex flex-wrap items-center gap-2.5 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
+              <span className="text-xs font-semibold text-slate-400 shrink-0">Tipo:</span>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as any)}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+              >
+                <option value="ALL">Todos los tipos</option>
+                {group.members.length === 1 ? (
+                  <>
+                    <option value="SHARED_EXPENSE">Gastos</option>
+                    <option value="INCOME">Ingresos</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="SHARED_EXPENSE">Compartidos</option>
+                    <option value="INDIVIDUAL_EXPENSE">Adelantos</option>
+                    <option value="LOAN">Préstamos</option>
+                    <option value="SETTLEMENT">Liquidaciones</option>
+                  </>
+                )}
+              </select>
             </div>
 
             {group.members.length > 1 && (
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs text-slate-400 font-medium">Miembro:</span>
-              <select
-                value={memberFilter}
-                onChange={(e) => setMemberFilter(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-2.5 py-1.5 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
-              >
-                <option value="ALL">Todos los miembros</option>
-                {group.members.map((m) => {
-                  const u = allUsers.find((user) => user.id === m.userId);
-                  return (
-                    <option key={m.userId} value={m.userId}>
-                      {u?.name}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
+              <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
+                <span className="text-xs font-semibold text-slate-400 shrink-0">Miembro:</span>
+                <select
+                  value={memberFilter}
+                  onChange={(e) => setMemberFilter(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">Todos los miembros</option>
+                  {group.members.map((m) => {
+                    const u = allUsers.find((user) => user.id === m.userId);
+                    return (
+                      <option key={m.userId} value={m.userId}>
+                        {u?.name || 'Usuario'}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
             )}
           </div>
 
@@ -466,12 +461,7 @@ export const GroupDetailPage: React.FC = () => {
       {/* TAB 2: BALANCES */}
       {activeTab === 'balances' && (
         <div className="space-y-4">
-          <div className="p-4 bg-slate-100/70 rounded-2xl text-xs text-slate-600 flex items-start gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <p>
-              Todos los movimientos (gastos compartidos, individuales, préstamos y devoluciones) están unificados en un único balance neto. La suma total de los balances es exactamente 0,00 €.
-            </p>
-          </div>
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {balances.map((b) => {
@@ -536,12 +526,7 @@ export const GroupDetailPage: React.FC = () => {
       {/* TAB 3: DEUDAS SIMPLIFICADAS */}
       {activeTab === 'debts' && (
         <div className="space-y-4">
-          <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-start gap-3">
-            <Scale className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-brand-900">
-              <span className="font-bold">Algoritmo de simplificación activo:</span> Minimiza las transferencias sin alterar las posiciones netas. Puedes pulsar <strong>Liquidar</strong> en cualquier deuda para registrar la devolución de inmediato.
-            </p>
-          </div>
+
 
           <div className="space-y-3">
             {simplifiedDebts.length === 0 ? (
@@ -601,10 +586,6 @@ export const GroupDetailPage: React.FC = () => {
       {/* TAB 4: HISTORIAL DE LIQUIDACIONES */}
       {activeTab === 'settlements' && (
         <div className="space-y-4">
-          <p className="text-xs text-slate-500">
-            Registro exclusivo de transferencias, bizums y devoluciones realizadas para saldar deudas pendientes.
-          </p>
-
           <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
             {settlementMovements.length === 0 ? (
               <div className="p-8 text-center text-slate-400 text-sm">
@@ -612,32 +593,51 @@ export const GroupDetailPage: React.FC = () => {
               </div>
             ) : (
               settlementMovements.map((mov) => {
-                
+                const payer = allUsers.find((u) => u.id === mov.paidById);
+                const recipient = allUsers.find((u) => u.id === mov.recipientId);
+                const payerName = payer?.name.split(' ')[0] || currentUser.name.split(' ')[0] || 'Compañero';
+                const recipientName = recipient?.name.split(' ')[0] || 'Compañero';
+                const movDate = new Date(mov.date);
+                const monthStr = movDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '');
+                const dayStr = movDate.getDate();
+
                 return (
                   <div
                     key={mov.id}
                     onClick={() => setSelectedMovement(mov)}
-                    className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
+                    className="py-2 px-2.5 sm:py-2.5 sm:px-3.5 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                   >
-                    <div className="min-w-0 pr-3">
+                    {/* Fecha como primer dato en formato visible */}
+                    <div className="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0 leading-none border border-slate-200/60 dark:border-slate-700/60">
+                      <span className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-400 mb-0.5">
+                        {monthStr}
+                      </span>
+                      <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                        {dayStr}
+                      </span>
+                    </div>
+
+                    {/* Detalle */}
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
-                          ✓ Liquidación
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/60">
+                          Liquidación
                         </span>
-                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                        <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-xs">
                           {mov.concept}
                         </p>
                       </div>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                        {new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        <strong className="text-slate-700 dark:text-slate-300">{payerName}</strong> pagó a <strong className="text-slate-700 dark:text-slate-300">{recipientName}</strong>
                       </p>
                     </div>
 
+                    {/* Importe */}
                     <div className="text-right shrink-0">
-                      <span className="text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 block">
+                      <p className="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400">
                         {formatCurrency(mov.amountCents)}
-                      </span>
-                      <span className="text-[10px] text-slate-400">Liquidado</span>
+                      </p>
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Liquidado</span>
                     </div>
                   </div>
                 );
