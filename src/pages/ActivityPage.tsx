@@ -7,7 +7,6 @@ import { Movement, Group, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
-import { Avatar } from '../components/common/Avatar';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
 import { NewMovementModal } from '../components/movements/NewMovementModal';
 
@@ -149,39 +148,32 @@ export const ActivityPage: React.FC = () => {
           </div>
         ) : (
           filteredMovements.map((mov) => {
-            const payer = users.find((u) => u.id === mov.paidById);
             const group = groups.find((g) => g.id === mov.groupId);
-            const isPayerMe = mov.paidById === currentUser?.id;
 
             return (
               <div
                 key={mov.id}
                 onClick={() => setSelectedMovement(mov)}
-                className="p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50/80 cursor-pointer transition-colors"
+                className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <Avatar
-                    name={payer?.name || 'Usuario'}
-                    url={payer?.avatarUrl}
-                    size="md"
-                  />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-bold text-slate-900 truncate">{mov.concept}</p>
-                      <Badge type={mov.type} />
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
-                      <span>{group?.icon} {group?.name}</span>
-                      <span>•</span>
-                      <span>{isPayerMe ? 'Pagaste tú' : `Pagó ${payer?.name}`}</span>
-                      <span>•</span>
-                      <span>{new Date(mov.date).toLocaleDateString('es-ES')}</span>
-                    </div>
+                <div className="min-w-0 pr-3">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                      {mov.concept}
+                    </p>
+                    <Badge type={mov.type} />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                    <span className="truncate max-w-[120px] font-medium text-slate-600 dark:text-slate-300">
+                      {group?.icon} {group?.name}
+                    </span>
+                    <span>·</span>
+                    <span>{new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                   </div>
                 </div>
 
-                <div className="text-right pl-3 shrink-0">
-                  <p className="text-sm sm:text-base font-extrabold text-slate-900">
+                <div className="text-right shrink-0">
+                  <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
                     {formatCurrency(mov.amountCents)}
                   </p>
                   <MovementImpact movement={mov} userId={currentUser?.id} />

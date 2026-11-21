@@ -31,9 +31,16 @@ export const GroupsPage: React.FC = () => {
 
     const balancesMap: Record<string, number> = {};
     for (const g of grps) {
-      const gBalances = await repository.getGroupBalances(g.id);
-      const userB = gBalances.find((b) => b.userId === user.id);
-      balancesMap[g.id] = userB ? userB.netBalanceCents : 0;
+      if (g.members.length === 1) {
+        const movs = await repository.getMovements(g.id);
+        const inc = movs.filter((m) => m.type === 'INCOME').reduce((a, m) => a + m.amountCents, 0);
+        const exp = movs.filter((m) => m.type !== 'INCOME').reduce((a, m) => a + m.amountCents, 0);
+        balancesMap[g.id] = inc - exp;
+      } else {
+        const gBalances = await repository.getGroupBalances(g.id);
+        const userB = gBalances.find((b) => b.userId === user.id);
+        balancesMap[g.id] = userB ? userB.netBalanceCents : 0;
+      }
     }
     setGroupBalances(balancesMap);
   };
@@ -123,64 +130,59 @@ export const GroupsPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {groups.map((group) => {
           const balanceCents = groupBalances[group.id] || 0;
           const isIndividual = group.members.length === 1;
 
           return (
             <Link key={group.id} to={`/groups/${group.id}`} className="group">
-              <Card hoverable className="h-full flex flex-col justify-between">
+              <Card hoverable className="h-full p-3.5 sm:p-4 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-4xl p-2 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
-                      {group.icon}
-                    </span>
-                    {isIndividual ? (
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/50">
-                        <User className="w-3 h-3" />
-                        Uso individual
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl p-1.5 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                        {group.icon}
                       </span>
-                    ) : (
-                      <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full flex items-center gap-1">
+                      {isIndividual && (
+                        <span className="text-[11px] font-semibold px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 rounded-full flex items-center gap-1 border border-indigo-100 dark:border-indigo-900/50">
+                          <User className="w-3 h-3" />
+                          Personal
+                        </span>
+                      )}
+                    </div>
+                    {!isIndividual && (
+                      <span className="text-[11px] font-medium px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         {group.members.length} miembros
                       </span>
                     )}
                   </div>
 
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors mb-1">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors truncate">
                     {group.name}
                   </h3>
-                  <p className="text-xs text-slate-400 mb-3 line-clamp-2">
-                    {group.description || (isIndividual ? 'Espacio personal exclusivo para ti' : 'Sin descripción')}
-                  </p>
-
-                  <div className="text-xs text-slate-500 bg-slate-50 dark:bg-slate-800/70 rounded-xl p-2.5 mb-2">
-                    <span className="font-medium text-slate-700 dark:text-slate-300">Gestión: </span>
-                    {isIndividual ? 'Gastos 100% propios' : group.defaultSplitMode === 'EQUAL' ? 'Partes iguales' : 'Porcentual'}
-                  </div>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-xs text-slate-400 font-medium">
-                    {isIndividual ? 'Tipo de espacio' : 'Tu saldo neto'}
+                <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-3">
+                  <span className="text-slate-400 font-medium">
+                    {isIndividual ? 'Balance:' : balanceCents > 0 ? 'Te deben:' : balanceCents < 0 ? 'Debes:' : 'Al día:'}
                   </span>
                   {isIndividual ? (
-                    <span className="text-xs font-bold text-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-900/50 text-indigo-700 dark:text-indigo-300">
-                      Personal (sin deudas)
+                    <span className={`text-sm font-bold ${balanceCents >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                      {formatCurrency(balanceCents, { showSign: true })}
                     </span>
                   ) : (
                     <span
                       className={`text-sm font-bold ${
                         balanceCents > 0
-                          ? 'text-emerald-600'
+                          ? 'text-emerald-600 dark:text-emerald-400'
                           : balanceCents < 0
-                          ? 'text-rose-600'
+                          ? 'text-rose-600 dark:text-rose-400'
                           : 'text-slate-500'
                       }`}
                     >
-                      {formatCurrency(balanceCents, { showSign: true })}
+                      {balanceCents === 0 ? '0,00 €' : formatCurrency(Math.abs(balanceCents))}
                     </span>
                   )}
                 </div>

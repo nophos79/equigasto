@@ -386,35 +386,27 @@ export const GroupDetailPage: React.FC = () => {
               </div>
             ) : (
               filteredMovements.map((mov) => {
-                const payer = allUsers.find((u) => u.id === mov.paidById);
-                const isPayerMe = mov.paidById === currentUser.id;
-
+                
                 return (
                   <div
                     key={mov.id}
                     onClick={() => setSelectedMovement(mov)}
-                    className="p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50/80 cursor-pointer transition-colors"
+                    className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <Avatar
-                        name={payer?.name || 'Usuario'}
-                        url={payer?.avatarUrl}
-                        size="md"
-                      />
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-bold text-slate-900 truncate">{mov.concept}</p>
-                          <Badge type={mov.type} />
-                        </div>
-                        <p className="text-xs text-slate-400 mt-1">
-                          {isPayerMe ? 'Pagaste tú' : `Pagó ${payer?.name}`} •{' '}
-                          {new Date(mov.date).toLocaleDateString('es-ES')}
+                    <div className="min-w-0 pr-3">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate max-w-[200px] sm:max-w-xs">
+                          {mov.concept}
                         </p>
+                        <Badge type={mov.type} />
                       </div>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        {new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </p>
                     </div>
 
-                    <div className="text-right pl-3 shrink-0">
-                      <p className="text-sm sm:text-base font-extrabold text-slate-900">
+                    <div className="text-right shrink-0">
+                      <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white">
                         {formatCurrency(mov.amountCents)}
                       </p>
                       <MovementImpact movement={mov} userId={currentUser?.id} />
@@ -576,33 +568,32 @@ export const GroupDetailPage: React.FC = () => {
               </div>
             ) : (
               settlementMovements.map((mov) => {
-                const payer = allUsers.find((u) => u.id === mov.paidById);
-                const recipient = allUsers.find((u) => u.id === mov.recipientId);
-
+                
                 return (
                   <div
                     key={mov.id}
                     onClick={() => setSelectedMovement(mov)}
-                    className="p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50/80 cursor-pointer transition-colors"
+                    className="py-2.5 px-3.5 sm:py-3.5 sm:px-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-850 cursor-pointer transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-xl">
-                        <CheckCircle2 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{mov.concept}</p>
-                        <p className="text-xs text-slate-500">
-                          {payer?.name} devolvió a {recipient?.name} •{' '}
-                          {new Date(mov.date).toLocaleDateString('es-ES')}
+                    <div className="min-w-0 pr-3">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
+                          ✓ Liquidación
+                        </span>
+                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {mov.concept}
                         </p>
                       </div>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
+                        {new Date(mov.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </p>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-sm font-bold text-emerald-700">
+                    <div className="text-right shrink-0">
+                      <span className="text-xs sm:text-sm font-extrabold text-emerald-600 dark:text-emerald-400 block">
                         {formatCurrency(mov.amountCents)}
                       </span>
-                      <span className="block text-[11px] text-slate-400">Ver liquidación</span>
+                      <span className="text-[10px] text-slate-400">Liquidado</span>
                     </div>
                   </div>
                 );

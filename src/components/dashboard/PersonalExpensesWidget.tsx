@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Wallet, PlusCircle, ArrowUpRight, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { User, Wallet, PlusCircle, ArrowUpRight } from 'lucide-react';
 import { Card } from '../common/Card';
 import { formatCurrency } from '../../core/money';
 import type { Group, Movement } from '../../core/types';
@@ -123,12 +123,7 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
     );
   }
 
-  const periodLabels: Record<PeriodFilter, string> = {
-    month: 'Este mes',
-    year: 'Este año',
-    all: 'Histórico total',
-  };
-
+  
   return (
     <Card className="border border-indigo-100 dark:border-indigo-900/50 bg-white dark:bg-slate-900 space-y-4">
       {/* Cabecera del cuadro */}
@@ -170,53 +165,45 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
       </div>
 
       {/* Métricas del período: Ingresos, Gastos y Balance */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* Total Ingresos */}
-        <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/40">
-          <div className="flex items-center justify-between text-xs font-semibold text-emerald-800">
-            <span>Ingresos ({periodLabels[period]})</span>
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-          </div>
-          <p className="text-2xl font-black text-emerald-700 mt-1">
+        <div className="p-2.5 sm:p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 text-center">
+          <span className="text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 block truncate">
+            Ingresos
+          </span>
+          <p className="text-base sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 truncate">
             {formatCurrency(totalIncomeCents)}
           </p>
-          <span className="text-[11px] text-emerald-600 font-medium">Entradas registradas</span>
         </div>
 
         {/* Total Gastos */}
-        <div className="p-3.5 bg-rose-50/70 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/40">
-          <div className="flex items-center justify-between text-xs font-semibold text-rose-800">
-            <span>Gastos ({periodLabels[period]})</span>
-            <TrendingDown className="w-3.5 h-3.5 text-rose-600" />
-          </div>
-          <p className="text-2xl font-black text-rose-700 mt-1">
+        <div className="p-2.5 sm:p-3.5 bg-rose-50/70 dark:bg-rose-950/30 rounded-2xl border border-rose-100 dark:border-rose-900/40 text-center">
+          <span className="text-[11px] sm:text-xs font-bold text-rose-800 dark:text-rose-300 block truncate">
+            Gastos
+          </span>
+          <p className="text-base sm:text-2xl font-black text-rose-700 dark:text-rose-400 mt-0.5 truncate">
             {formatCurrency(totalExpenseCents)}
           </p>
-          <span className="text-[11px] text-rose-600 font-medium">Salidas y compras</span>
         </div>
 
         {/* Balance / Ahorro Neto */}
-        <div className="p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40">
-          <div className="flex items-center justify-between text-xs font-semibold text-indigo-800">
-            <span>Balance neto ({periodLabels[period]})</span>
-            <Scale className="w-3.5 h-3.5 text-indigo-600" />
-          </div>
+        <div className="p-2.5 sm:p-3.5 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 text-center">
+          <span className="text-[11px] sm:text-xs font-bold text-indigo-800 dark:text-indigo-300 block truncate">
+            Balance
+          </span>
           <p
-            className={`text-2xl font-black mt-1 ${
-              netBalanceCents >= 0 ? 'text-indigo-900' : 'text-rose-700'
+            className={`text-base sm:text-2xl font-black mt-0.5 truncate ${
+              netBalanceCents >= 0 ? 'text-indigo-900 dark:text-indigo-300' : 'text-rose-700 dark:text-rose-400'
             }`}
           >
             {formatCurrency(netBalanceCents, { showSign: true })}
           </p>
-          <span className="text-[11px] text-indigo-600 font-medium">
-            {netBalanceCents >= 0 ? 'Ahorro positivo' : 'Gastos superiores a ingresos'}
-          </span>
         </div>
       </div>
 
-      {/* Desglose por grupo individual */}
+      {/* Detalle por grupo individual */}
       <div className="pt-1">
-        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-2">Desglose por espacio:</span>
+        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 block mb-2">Detalle:</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {breakdownByGroup.map(({ group, count, incomes, expenses }) => (
             <Link
