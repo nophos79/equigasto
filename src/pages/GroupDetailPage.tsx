@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useOutletContext, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  Plus,
+  Search,
   CheckCircle2,
   UserPlus,
   Save,
@@ -34,6 +34,7 @@ export const GroupDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'movements' | 'balances' | 'debts' | 'settlements' | 'config'>('movements');
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [memberFilter, setMemberFilter] = useState<string>('ALL');
+  const [conceptSearchQuery, setConceptSearchQuery] = useState('');
   const [selectedMovement, setSelectedMovement] = useState<Movement | null>(null);
   const [movementToEdit, setMovementToEdit] = useState<Movement | null>(null);
 
@@ -132,6 +133,9 @@ export const GroupDetailPage: React.FC = () => {
   // Filtrado de movimientos
   const filteredMovements = movements
     .filter((m) => {
+      if (conceptSearchQuery.trim() && !m.concept.toLowerCase().includes(conceptSearchQuery.trim().toLowerCase())) {
+        return false;
+      }
       if (typeFilter !== 'ALL' && m.type !== typeFilter) return false;
       if (memberFilter !== 'ALL') {
         const isPayer = m.paidById === memberFilter;
@@ -234,8 +238,8 @@ export const GroupDetailPage: React.FC = () => {
                 {group.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight break-all line-clamp-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
                     {group.name}
                   </h1>
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
@@ -243,24 +247,14 @@ export const GroupDetailPage: React.FC = () => {
                   </span>
                 </div>
                 {group.description && (
-                  <p className="text-xs text-slate-500 mt-0.5 break-all line-clamp-1">
+                  <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
                     {group.description}
                   </p>
                 )}
               </div>
             </div>
 
-            <button
-              onClick={() => {
-                setPrefillSettlement(null);
-                setMovementToEdit(null);
-                setIsNewMovementModalOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Añadir gasto</span>
-            </button>
+            
           </div>
 
           {/* Fila inferior: Píldora de saldo idéntica a las tarjetas de inicio */}
@@ -346,52 +340,76 @@ export const GroupDetailPage: React.FC = () => {
       {/* TAB 1: MOVIMIENTOS */}
       {activeTab === 'movements' && (
         <div className="space-y-4">
-          {/* Filtros en desplegables */}
-          <div className="flex flex-wrap items-center gap-2.5 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
-              <span className="text-xs font-semibold text-slate-400 shrink-0">Tipo:</span>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">Todos los tipos</option>
-                {group.members.length === 1 ? (
-                  <>
-                    <option value="SHARED_EXPENSE">Gastos</option>
-                    <option value="INCOME">Ingresos</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="SHARED_EXPENSE">Compartidos</option>
-                    <option value="INDIVIDUAL_EXPENSE">Adelantos</option>
-                    <option value="LOAN">Préstamos</option>
-                    <option value="SETTLEMENT">Liquidaciones</option>
-                  </>
-                )}
-              </select>
+          {/* Filtros y Buscador de Concepto */}
+          <div className="space-y-2 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
+            {/* Buscador de concepto */}
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar por concepto..."
+                value={conceptSearchQuery}
+                onChange={(e) => setConceptSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-8 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+              {conceptSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setConceptSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
-            {group.members.length > 1 && (
-              <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
-                <span className="text-xs font-semibold text-slate-400 shrink-0">Miembro:</span>
+            {/* Desplegables Tipo y Miembro */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
+                <span className="text-xs font-semibold text-slate-400 shrink-0">Tipo:</span>
                 <select
-                  value={memberFilter}
-                  onChange={(e) => setMemberFilter(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as any)}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
                 >
-                  <option value="ALL">Todos los miembros</option>
-                  {group.members.map((m) => {
-                    const u = allUsers.find((user) => user.id === m.userId);
-                    return (
-                      <option key={m.userId} value={m.userId}>
-                        {u?.name || 'Usuario'}
-                      </option>
-                    );
-                  })}
+                  <option value="ALL">Todos los tipos</option>
+                  {group.members.length === 1 ? (
+                    <>
+                      <option value="SHARED_EXPENSE">Gastos</option>
+                      <option value="INCOME">Ingresos</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="SHARED_EXPENSE">Compartidos</option>
+                      <option value="INDIVIDUAL_EXPENSE">Adelantos</option>
+                      <option value="LOAN">Préstamos</option>
+                      <option value="SETTLEMENT">Liquidaciones</option>
+                    </>
+                  )}
                 </select>
               </div>
-            )}
+
+              {group.members.length > 1 && (
+                <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
+                  <span className="text-xs font-semibold text-slate-400 shrink-0">Miembro:</span>
+                  <select
+                    value={memberFilter}
+                    onChange={(e) => setMemberFilter(e.target.value)}
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                  >
+                    <option value="ALL">Todos los miembros</option>
+                    {group.members.map((m) => {
+                      const u = allUsers.find((user) => user.id === m.userId);
+                      return (
+                        <option key={m.userId} value={m.userId}>
+                          {u?.name || 'Usuario'}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
 
           <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">

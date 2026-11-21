@@ -36,7 +36,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   const isEditing = Boolean(movementToEdit);
 
   const [selectedGroupId, setSelectedGroupId] = useState(
-    movementToEdit?.groupId || initialGroupId || groups[0]?.id || ''
+    movementToEdit?.groupId || initialGroupId || ''
   );
   const [type, setType] = useState<MovementType>(
     movementToEdit?.type || initialType || 'SHARED_EXPENSE'
@@ -298,10 +298,12 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Grupo</label>
             <select
+              required
               value={selectedGroupId}
               onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer"
             >
+              <option value="" disabled>Selecciona un grupo...</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.icon} {g.name}
@@ -494,7 +496,7 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || (type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && !isPercentageValid)}
+              disabled={isSubmitting || !selectedGroupId || (type === 'SHARED_EXPENSE' && splitMode === 'PERCENTAGE' && !isPercentageValid)}
               className="flex-1 py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/20 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {isSubmitting ? 'Guardando...' : type === 'INCOME' ? 'Registrar Ingreso' : isEditing ? 'Guardar Cambios' : 'Registrar Gasto'}
