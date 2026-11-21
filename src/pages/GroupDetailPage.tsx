@@ -230,145 +230,120 @@ export const GroupDetailPage: React.FC = () => {
           <span>Volver a Mis Grupos</span>
         </Link>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-3.5 shadow-sm">
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Izquierda: Icono + Nombre + Miembros */}
-            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
-              <span className="text-2xl sm:text-3xl p-1.5 sm:p-2 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
-                {group.icon}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
-                    {group.name}
-                  </h1>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
-                    {group.members.length === 1 ? 'Personal' : `${group.members.length} miembros`}
-                  </span>
-                </div>
-                {group.description && (
-                  <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
-                    {group.description}
-                  </p>
-                )}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-3 sm:p-4 shadow-sm">
+          {/* Fila superior: Icono + Nombre + Badges */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-2xl sm:text-3xl p-2 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0">
+              {group.icon}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0">
+                <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
+                  {group.name}
+                </h1>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                  {group.members.length === 1 ? 'Personal' : `${group.members.length} miembros`}
+                </span>
               </div>
+              {group.description && (
+                <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
+                  {group.description}
+                </p>
+              )}
             </div>
+          </div>
 
-            {/* Derecha: Resultado debe o te deben con la cantidad */}
-            <div
-              className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl flex items-center gap-1.5 sm:gap-2 shrink-0 border ${
+          {/* Fila inferior: Píldora de saldo debajo del grupo */}
+          <div
+            className={`mt-2.5 p-2.5 sm:p-3 rounded-xl flex items-center justify-between border ${
+              group.members.length === 1
+                ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60'
+                : (currentUserBalance?.netBalanceCents || 0) > 0
+                ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+                : (currentUserBalance?.netBalanceCents || 0) < 0
+                ? 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'
+                : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            <span
+              className={`text-sm font-bold ${
                 group.members.length === 1
-                  ? 'bg-indigo-50/70 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60'
+                  ? 'text-indigo-800 dark:text-indigo-300'
                   : (currentUserBalance?.netBalanceCents || 0) > 0
-                  ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+                  ? 'text-emerald-800 dark:text-emerald-300'
                   : (currentUserBalance?.netBalanceCents || 0) < 0
-                  ? 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/60'
-                  : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+                  ? 'text-rose-800 dark:text-rose-300'
+                  : 'text-slate-600 dark:text-slate-400'
               }`}
             >
-              <span
-                className={`text-xs sm:text-sm font-bold ${
-                  group.members.length === 1
-                    ? 'text-indigo-800 dark:text-indigo-300'
-                    : (currentUserBalance?.netBalanceCents || 0) > 0
-                    ? 'text-emerald-800 dark:text-emerald-300'
-                    : (currentUserBalance?.netBalanceCents || 0) < 0
-                    ? 'text-rose-800 dark:text-rose-300'
-                    : 'text-slate-600 dark:text-slate-400'
-                }`}
-              >
-                {group.members.length === 1
-                  ? 'Balance'
+              {group.members.length === 1
+                ? 'Balance'
+                : (currentUserBalance?.netBalanceCents || 0) > 0
+                ? 'Te deben'
+                : (currentUserBalance?.netBalanceCents || 0) < 0
+                ? 'Debes'
+                : 'Al día'}
+            </span>
+            <span
+              className={`text-base sm:text-lg font-black ${
+                group.members.length === 1
+                  ? (currentUserBalance?.netBalanceCents || 0) >= 0
+                    ? 'text-indigo-900 dark:text-indigo-200'
+                    : 'text-rose-700 dark:text-rose-400'
                   : (currentUserBalance?.netBalanceCents || 0) > 0
-                  ? 'Te deben'
+                  ? 'text-emerald-600 dark:text-emerald-400'
                   : (currentUserBalance?.netBalanceCents || 0) < 0
-                  ? 'Debes'
-                  : 'Al día'}
-              </span>
-              <span
-                className={`text-sm sm:text-base font-black ${
-                  group.members.length === 1
-                    ? (currentUserBalance?.netBalanceCents || 0) >= 0
-                      ? 'text-indigo-900 dark:text-indigo-200'
-                      : 'text-rose-700 dark:text-rose-400'
-                    : (currentUserBalance?.netBalanceCents || 0) > 0
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : (currentUserBalance?.netBalanceCents || 0) < 0
-                    ? 'text-rose-600 dark:text-rose-400'
-                    : 'text-slate-700 dark:text-slate-300'
-                }`}
-              >
-                {group.members.length === 1
-                  ? formatCurrency(currentUserBalance?.netBalanceCents || 0, { showSign: true })
-                  : (currentUserBalance?.netBalanceCents || 0) === 0
-                  ? '0,00 €'
-                  : ((currentUserBalance?.netBalanceCents || 0) > 0 ? '+' : '-') +
-                    formatCurrency(Math.abs(currentUserBalance?.netBalanceCents || 0))}
-              </span>
-            </div>
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {group.members.length === 1
+                ? formatCurrency(currentUserBalance?.netBalanceCents || 0, { showSign: true })
+                : (currentUserBalance?.netBalanceCents || 0) === 0
+                ? '0,00 €'
+                : ((currentUserBalance?.netBalanceCents || 0) > 0 ? '+' : '-') +
+                  formatCurrency(Math.abs(currentUserBalance?.netBalanceCents || 0))}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Selector de Sección (Desplegable) con el mismo aspecto visual que Tipo y Miembro */}
-      <div className="flex items-center gap-1.5 max-w-xs sm:max-w-sm">
-        <span className="text-xs font-semibold text-slate-400 shrink-0">
-          Ver:
-        </span>
-        <select
-          id="group-section-select"
-          value={activeTab}
-          onChange={(e) => setActiveTab(e.target.value as any)}
-          className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
-        >
-          <option value="movements">Movimientos ({movements.length})</option>
-          {group.members.length > 1 && (
-            <>
-              <option value="balances">
-                Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
-              </option>
-              <option value="debts">Deudas Simplificadas ({simplifiedDebts.length})</option>
-              <option value="settlements">Liquidaciones ({settlementMovements.length})</option>
-            </>
-          )}
-          <option value="config">Configuración del grupo</option>
-        </select>
-      </div>
-
-      {/* TAB 1: MOVIMIENTOS */}
-      {activeTab === 'movements' && (
-        <div className="space-y-4">
-          {/* Filtros y Buscador de Concepto */}
-          <div className="space-y-2 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
-            {/* Buscador de concepto */}
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Buscar por concepto..."
-                value={conceptSearchQuery}
-                onChange={(e) => setConceptSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
-              {conceptSearchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setConceptSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
-                >
-                  ✕
-                </button>
+      {/* Controles: Selector de Sección (Ver), Filtros y Búsqueda */}
+      <div className="space-y-2.5 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-xs">
+        {/* Fila de Desplegables perfectamente alineados */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Selector de Sección Ver */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
+            <span className="text-xs font-semibold text-slate-400 shrink-0">Ver:</span>
+            <select
+              id="group-section-select"
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="movements">Movimientos ({movements.length})</option>
+              {group.members.length > 1 && (
+                <>
+                  <option value="balances">
+                    Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
+                  </option>
+                  <option value="debts">Deudas Simplificadas ({simplifiedDebts.length})</option>
+                  <option value="settlements">Liquidaciones ({settlementMovements.length})</option>
+                </>
               )}
-            </div>
+              <option value="config">Configuración del grupo</option>
+            </select>
+          </div>
 
-            {/* Desplegables Tipo y Miembro */}
-            <div className="flex flex-wrap items-center gap-2">
+          {/* Filtros de Tipo y Miembro (cuando estamos en la sección de movimientos) */}
+          {activeTab === 'movements' && (
+            <>
               <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
                 <span className="text-xs font-semibold text-slate-400 shrink-0">Tipo:</span>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as any)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
                 >
                   <option value="ALL">Todos los tipos</option>
                   {group.members.length === 1 ? (
@@ -393,7 +368,7 @@ export const GroupDetailPage: React.FC = () => {
                   <select
                     value={memberFilter}
                     onChange={(e) => setMemberFilter(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
                   >
                     <option value="ALL">Todos los miembros</option>
                     {group.members.map((m) => {
@@ -407,9 +382,37 @@ export const GroupDetailPage: React.FC = () => {
                   </select>
                 </div>
               )}
-            </div>
-          </div>
+            </>
+          )}
+        </div>
 
+        {/* Buscador de concepto (solo en movimientos) */}
+        {activeTab === 'movements' && (
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Buscar por concepto..."
+              value={conceptSearchQuery}
+              onChange={(e) => setConceptSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+            {conceptSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setConceptSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* TAB 1: MOVIMIENTOS */}
+      {activeTab === 'movements' && (
+        <div className="space-y-4">
           <Card className="divide-y divide-slate-100 dark:divide-slate-800 p-0 overflow-hidden">
             {filteredMovements.length === 0 ? (
               <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-sm">
