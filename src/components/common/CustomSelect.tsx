@@ -13,6 +13,7 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   className?: string;
   buttonClassName?: string;
+  menuClassName?: string;
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -22,6 +23,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   className = '',
   buttonClassName = '',
+  menuClassName = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +74,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 mt-1.5 w-max min-w-full max-w-xs z-50 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-100">
+          <div className={`absolute left-0 mt-1.5 min-w-full z-50 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-100 ${menuClassName || 'w-max max-w-md'}`}>
             {options.map((option) => {
               const isSelected = option.value === value;
               return (

@@ -18,7 +18,12 @@ import { Badge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
 import { NewMovementModal } from '../components/movements/NewMovementModal';
-import { CustomSelect } from '../components/common/CustomSelect';
+import { CustomSelect, SelectOption } from '../components/common/CustomSelect';
+
+const splitModeConfigOptions: SelectOption[] = [
+  { value: 'EQUAL', label: 'Partes iguales (Todos asumen la misma fracción)' },
+  { value: 'PERCENTAGE', label: 'Porcentajes personalizados por miembro' },
+];
 
 export const GroupDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -711,17 +716,15 @@ export const GroupDetailPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                   Modalidad de reparto predeterminada
                 </label>
-                <select
+                <CustomSelect
                   value={editSplitMode}
-                  onChange={(e) => setEditSplitMode(e.target.value as SplitMode)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                >
-                  <option value="EQUAL">Partes iguales (Todos asumen la misma fracción)</option>
-                  <option value="PERCENTAGE">Porcentajes personalizados por miembro</option>
-                </select>
+                  onChange={(val) => setEditSplitMode(val as SplitMode)}
+                  options={splitModeConfigOptions}
+                  buttonClassName="w-full py-2.5 px-3.5 text-sm"
+                />
                 <p className="text-[11px] text-slate-400 mt-1">
                   Esta configuración se aplicará automáticamente al crear nuevos gastos compartidos.
                 </p>

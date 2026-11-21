@@ -6,6 +6,12 @@ import { repository } from '../data/index';
 import { Group, SplitMode, UserProfile } from '../core/types';
 import { formatCurrency } from '../core/money';
 import { Card } from '../components/common/Card';
+import { CustomSelect, SelectOption } from '../components/common/CustomSelect';
+
+const splitModeOptions: SelectOption[] = [
+  { value: 'EQUAL', label: 'Partes iguales (Todos pagan igual)' },
+  { value: 'PERCENTAGE', label: 'Porcentajes personalizados' },
+];
 
 export const GroupsPage: React.FC = () => {
   const { refreshTrigger, triggerRefresh } = useOutletContext<{ refreshTrigger: number; triggerRefresh: () => void }>();
@@ -309,14 +315,12 @@ export const GroupsPage: React.FC = () => {
                 <>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Modalidad de reparto base</label>
-                    <select
+                    <CustomSelect
                       value={newGroupSplitMode}
-                      onChange={(e) => setNewGroupSplitMode(e.target.value as SplitMode)}
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                    >
-                      <option value="EQUAL">Partes iguales (Todos pagan igual)</option>
-                      <option value="PERCENTAGE">Porcentajes personalizados</option>
-                    </select>
+                      onChange={(val) => setNewGroupSplitMode(val as SplitMode)}
+                      options={splitModeOptions}
+                      buttonClassName="w-full py-2.5 px-3.5 text-sm"
+                    />
                   </div>
 
                   {/* Añadir miembros iniciales */}
@@ -364,7 +368,7 @@ export const GroupsPage: React.FC = () => {
                     Grupo individual para tus finanzas privadas
                   </p>
                   <p className="text-indigo-600 dark:text-indigo-400 text-[11px] leading-relaxed">
-                    Tus gastos aquí no se mezclan con deudas de amigos ni viajes compartidos.
+                    Tus movimientos no se mezclan con los de los grupos compartidos.
                   </p>
                 </div>
               )}

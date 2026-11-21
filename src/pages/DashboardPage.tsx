@@ -144,7 +144,7 @@ export const DashboardPage: React.FC = () => {
           <div className="p-3.5 sm:p-4 bg-emerald-50/80 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/50 shadow-xs">
             {peopleWhoOweMe.length === 0 ? (
               <p className="text-base sm:text-lg font-bold text-emerald-800 dark:text-emerald-300 text-center py-2">
-                Nadie te debe dinero
+                Nadie te debe
               </p>
             ) : (
               <div className="space-y-2">
