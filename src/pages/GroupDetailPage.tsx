@@ -18,6 +18,7 @@ import { Badge } from '../components/common/Badge';
 import { Avatar } from '../components/common/Avatar';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
 import { NewMovementModal } from '../components/movements/NewMovementModal';
+import { CustomSelect } from '../components/common/CustomSelect';
 
 export const GroupDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -218,6 +219,46 @@ export const GroupDetailPage: React.FC = () => {
     setIsNewMovementModalOpen(true);
   };
 
+  const sectionOptions = [
+    { value: 'movements', label: `Movimientos (${movements.length})` },
+    ...(group.members.length > 1
+      ? [
+          {
+            value: 'balances',
+            label: `Balances (${balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})`,
+          },
+          { value: 'debts', label: `Deudas Simplificadas (${simplifiedDebts.length})` },
+          { value: 'settlements', label: `Liquidaciones (${settlementMovements.length})` },
+        ]
+      : []),
+    { value: 'config', label: 'Configuración del grupo' },
+  ];
+
+  const typeOptions = group.members.length === 1
+    ? [
+        { value: 'ALL', label: 'Todos los tipos' },
+        { value: 'SHARED_EXPENSE', label: 'Gastos' },
+        { value: 'INCOME', label: 'Ingresos' },
+      ]
+    : [
+        { value: 'ALL', label: 'Todos los tipos' },
+        { value: 'SHARED_EXPENSE', label: 'Compartidos' },
+        { value: 'INDIVIDUAL_EXPENSE', label: 'Adelantos' },
+        { value: 'LOAN', label: 'Préstamos' },
+        { value: 'SETTLEMENT', label: 'Liquidaciones' },
+      ];
+
+  const memberOptions = [
+    { value: 'ALL', label: 'Todos los miembros' },
+    ...group.members.map((m) => {
+      const u = allUsers.find((user) => user.id === m.userId);
+      return {
+        value: m.userId,
+        label: u?.name || 'Usuario',
+      };
+    }),
+  ];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Volver y Encabezado */}
@@ -313,74 +354,33 @@ export const GroupDetailPage: React.FC = () => {
         {/* Fila de Desplegables perfectamente alineados */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Selector de Sección Ver */}
-          <div className="flex items-center gap-1.5 flex-1 min-w-[140px]">
-            <span className="text-xs font-semibold text-slate-400 shrink-0">Ver:</span>
-            <select
-              id="group-section-select"
-              value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value as any)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
-            >
-              <option value="movements">Movimientos ({movements.length})</option>
-              {group.members.length > 1 && (
-                <>
-                  <option value="balances">
-                    Balances ({balances.filter((b) => b.paidCents !== 0 || b.shouldPayCents !== 0).length})
-                  </option>
-                  <option value="debts">Deudas Simplificadas ({simplifiedDebts.length})</option>
-                  <option value="settlements">Liquidaciones ({settlementMovements.length})</option>
-                </>
-              )}
-              <option value="config">Configuración del grupo</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Ver:"
+            value={activeTab}
+            onChange={(val) => setActiveTab(val as any)}
+            options={sectionOptions}
+            className="flex-1 min-w-[140px]"
+          />
 
           {/* Filtros de Tipo y Miembro (cuando estamos en la sección de movimientos) */}
           {activeTab === 'movements' && (
             <>
-              <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
-                <span className="text-xs font-semibold text-slate-400 shrink-0">Tipo:</span>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as any)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
-                >
-                  <option value="ALL">Todos los tipos</option>
-                  {group.members.length === 1 ? (
-                    <>
-                      <option value="SHARED_EXPENSE">Gastos</option>
-                      <option value="INCOME">Ingresos</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="SHARED_EXPENSE">Compartidos</option>
-                      <option value="INDIVIDUAL_EXPENSE">Adelantos</option>
-                      <option value="LOAN">Préstamos</option>
-                      <option value="SETTLEMENT">Liquidaciones</option>
-                    </>
-                  )}
-                </select>
-              </div>
+              <CustomSelect
+                label="Tipo:"
+                value={typeFilter}
+                onChange={(val) => setTypeFilter(val as any)}
+                options={typeOptions}
+                className="flex-1 min-w-[130px]"
+              />
 
               {group.members.length > 1 && (
-                <div className="flex items-center gap-1.5 flex-1 min-w-[130px]">
-                  <span className="text-xs font-semibold text-slate-400 shrink-0">Miembro:</span>
-                  <select
-                    value={memberFilter}
-                    onChange={(e) => setMemberFilter(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none cursor-pointer"
-                  >
-                    <option value="ALL">Todos los miembros</option>
-                    {group.members.map((m) => {
-                      const u = allUsers.find((user) => user.id === m.userId);
-                      return (
-                        <option key={m.userId} value={m.userId}>
-                          {u?.name || 'Usuario'}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Miembro:"
+                  value={memberFilter}
+                  onChange={(val) => setMemberFilter(val)}
+                  options={memberOptions}
+                  className="flex-1 min-w-[130px]"
+                />
               )}
             </>
           )}
@@ -395,7 +395,7 @@ export const GroupDetailPage: React.FC = () => {
               placeholder="Buscar por concepto..."
               value={conceptSearchQuery}
               onChange={(e) => setConceptSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+              className="w-full pl-9 pr-8 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             {conceptSearchQuery && (
               <button
