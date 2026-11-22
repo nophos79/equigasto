@@ -28,6 +28,10 @@
             var meta = document.querySelector('meta[name="theme-color"]');
             if (meta) meta.setAttribute('content', '#0f172a');
           }
+          var f = localStorage.getItem('equigasto-font-size');
+          if (f === 'large') {
+            document.documentElement.classList.add('font-large');
+          }
         } catch(e) {}
       })();
     </script>

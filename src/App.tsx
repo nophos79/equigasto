@@ -12,6 +12,7 @@ import { AuthPage } from './pages/AuthPage';
 import { useAuth } from './hooks/useAuth';
 import { isSupabaseConfigured } from './data/supabaseClient';
 import { ThemeProvider } from './context/ThemeContext';
+import { FontSizeProvider } from './context/FontSizeContext';
 
 export const AppContent: React.FC = () => {
   const {
@@ -93,7 +94,9 @@ export const AppContent: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <AppContent />
+      <FontSizeProvider>
+        <AppContent />
+      </FontSizeProvider>
     </ThemeProvider>
   );
 };

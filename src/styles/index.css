@@ -9,6 +9,13 @@
   html.dark {
     color-scheme: dark;
   }
+  html.font-large {
+    font-size: 114%;
+  }
+  html.font-large .font-scale-highlight {
+    font-size: 1.45rem !important;
+    font-weight: 800 !important;
+  }
   body {
     -webkit-tap-highlight-color: transparent;
     @apply bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-150 text-[15px] sm:text-base;

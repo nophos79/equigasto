@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2, KeyRound, Eye, EyeOff, AlertCircle, Pencil, Check, X } from 'lucide-react';
+import { Shield, Smartphone, Globe, LogOut, CheckCircle2, Moon, UserCheck, UserX, Clock, ShieldAlert, Loader2, KeyRound, Eye, EyeOff, AlertCircle, Pencil, Check, X, Type } from 'lucide-react';
 import { repository } from '../data/index';
 import { supabase } from '../data/supabaseClient';
 import { UserProfile } from '../core/types';
 import { Card } from '../components/common/Card';
 import { Avatar } from '../components/common/Avatar';
 import { ThemeSelector } from '../components/common/ThemeToggle';
+import { FontSizeSelector } from '../components/common/FontSizeToggle';
 
 interface ProfilePageProps {
   onSignOut: () => Promise<void>;
@@ -362,6 +363,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onSignOut }) => {
             </div>
           </div>
           <ThemeSelector />
+        </div>
+
+        {/* Tamaño de Fuente / Accesibilidad */}
+        <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
+              <Type className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Tamaño del texto</p>
+              <p className="text-xs text-slate-400">Amplía la tipografía para mayor comodidad y legibilidad en el móvil</p>
+            </div>
+          </div>
+          <FontSizeSelector />
         </div>
 
         {/* Cambiar Contraseña */}

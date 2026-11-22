@@ -5,6 +5,7 @@ import { UserProfile } from '../../core/types';
 import { Avatar } from '../common/Avatar';
 import { NotificationsBell } from './NotificationsBell';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { FontSizeToggle } from '../common/FontSizeToggle';
 
 interface NavbarProps {
   currentUser: UserProfile;
@@ -37,6 +38,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onOpenNewMovement }
             <Plus className="w-4 h-4" />
             <span>Añadir gasto</span>
           </button>
+
+          {/* Selector de tamaño de fuente */}
+          <FontSizeToggle />
 
           {/* Selector de modo oscuro */}
           <ThemeToggle />

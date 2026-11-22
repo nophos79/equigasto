@@ -143,7 +143,7 @@ export const DashboardPage: React.FC = () => {
           {/* Cuadro Verde: Personas que te deben */}
           <div className="p-3.5 sm:p-4 bg-emerald-50/80 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/50 shadow-xs">
             {peopleWhoOweMe.length === 0 ? (
-              <p className="text-base sm:text-lg font-bold text-emerald-800 dark:text-emerald-300 text-center py-2">
+              <p className="text-base sm:text-lg font-bold text-emerald-800 dark:text-emerald-300 text-center py-2 font-scale-highlight transition-all">
                 Nadie te debe
               </p>
             ) : (
@@ -168,7 +168,7 @@ export const DashboardPage: React.FC = () => {
           {/* Cuadro Rojo: Personas a las que debes */}
           <div className="p-3.5 sm:p-4 bg-rose-50/80 dark:bg-rose-950/40 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 shadow-xs">
             {peopleIOwe.length === 0 ? (
-              <p className="text-base sm:text-lg font-bold text-rose-800 dark:text-rose-300 text-center py-2">
+              <p className="text-base sm:text-lg font-bold text-rose-800 dark:text-rose-300 text-center py-2 font-scale-highlight transition-all">
                 No debes nada
               </p>
             ) : (

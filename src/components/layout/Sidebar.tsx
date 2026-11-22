@@ -4,6 +4,7 @@ import { LayoutDashboard, Users, Activity, User, PlusCircle, ShieldCheck } from 
 import { UserProfile } from '../../core/types';
 import { Avatar } from '../common/Avatar';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { FontSizeToggle } from '../common/FontSizeToggle';
 
 interface SidebarProps {
   currentUser: UserProfile;
@@ -70,6 +71,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
 
       {/* Footer / User info & Theme */}
       <div className="border-t border-slate-100 dark:border-slate-800 pt-4 space-y-3">
+        <div className="flex items-center justify-between px-2">
+          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Texto
+          </span>
+          <FontSizeToggle showLabel />
+        </div>
+
         <div className="flex items-center justify-between px-2">
           <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
             Tema
