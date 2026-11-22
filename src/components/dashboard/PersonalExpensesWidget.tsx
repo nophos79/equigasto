@@ -98,21 +98,21 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
   // Si no hay ningún grupo individual creado todavía, mostramos tarjeta sugerencia compacta
   if (personalGroups.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-indigo-50/70 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-100 dark:border-indigo-900/50 p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-2xl shrink-0">
-              <User className="w-5 h-5" />
+      <Card className="bg-gradient-to-br from-indigo-50/70 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-100 dark:border-indigo-900/50 p-3.5 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-xl shrink-0">
+              <User className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Control de Finanzas Personales</h3>
-            </div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Control de Finanzas Personales
+            </h2>
           </div>
           <Link
             to="/groups"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors shrink-0 self-start sm:self-auto"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="w-3.5 h-3.5" />
             <span>Crear espacio individual</span>
           </Link>
         </div>
@@ -122,21 +122,18 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
 
   
   return (
-    <Card className="border border-indigo-100 dark:border-indigo-900/50 bg-white dark:bg-slate-900 space-y-4">
+    <Card className="border border-indigo-100 dark:border-indigo-900/50 bg-white dark:bg-slate-900 p-3.5 sm:p-4 space-y-3.5 sm:space-y-4">
       {/* Cabecera del cuadro */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-indigo-100 text-indigo-700 rounded-xl">
+          <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 rounded-xl shrink-0">
             <Wallet className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900">Control de Finanzas Personales</h3>
-              <span className="text-[11px] font-semibold px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-800/60">
-                Individual
-              </span>
-            </div>
-
+          <div className="flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Control de Finanzas Personales</h2>
+            <span className="text-[11px] font-semibold px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200 dark:border-indigo-800/60">
+              Individual
+            </span>
           </div>
         </div>
 
