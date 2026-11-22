@@ -6,14 +6,18 @@
       <stop offset="70%" stop-color="#6366f1"/>
       <stop offset="100%" stop-color="#f43f5e"/>
     </linearGradient>
+    <linearGradient id="lemonBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#fde047"/>
+    </linearGradient>
     <filter id="softGlow" x="-15%" y="-15%" width="130%" height="130%">
       <feGaussianBlur stdDeviation="12" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
 
-  <!-- Ice-white squircle card -->
-  <rect x="24" y="24" width="464" height="464" rx="108" fill="#f8fafc" stroke="#e2e8f0" stroke-width="6"/>
+  <!-- Soft Lemon pastel squircle card -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="url(#lemonBg)" stroke="#facc15" stroke-width="4"/>
 
   <g filter="url(#softGlow)" fill="none" stroke="url(#auroraGrad)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round">
     <!-- Euro main arc (C-curve) -->
