@@ -40,11 +40,11 @@ export const FontSizeSelector: React.FC = () => {
 
   const options: { value: 'normal' | 'large'; label: string }[] = [
     { value: 'normal', label: 'Normal' },
-    { value: 'large', label: 'Grande (Móvil)' },
+    { value: 'large', label: 'Grande' },
   ];
 
   return (
-    <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl gap-1">
+    <div className="grid grid-cols-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl gap-1 w-full sm:w-56">
       {options.map((opt) => {
         const isActive = fontSize === opt.value;
         return (
@@ -52,7 +52,7 @@ export const FontSizeSelector: React.FC = () => {
             key={opt.value}
             type="button"
             onClick={() => setFontSize(opt.value)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center justify-center py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
               isActive
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'

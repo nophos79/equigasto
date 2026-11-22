@@ -119,7 +119,7 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={closeAndMarkSeen} />
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="fixed left-3 right-3 top-16 sm:top-full sm:left-auto sm:right-0 sm:absolute mt-2 sm:w-96 max-w-sm mx-auto sm:mx-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Cabecera */}
             <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
                 </p>
               </div>
             ) : (
-              <ul className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+              <ul className="max-h-[65vh] sm:max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {activeNotifications.map((m) => {
                   const payer = users.find((u) => u.id === m.paidById);
                   const group = groups.find((g) => g.id === m.groupId);
@@ -171,10 +171,10 @@ export const NotificationsBell: React.FC<NotificationsBellProps> = ({ currentUse
                           isUnread(m) ? 'bg-brand-50/60 dark:bg-brand-950/40' : ''
                         }`}
                       >
-                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate pr-2">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 break-words pr-2">
                           {m.concept}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-2">
                           {group?.icon} {group?.name} · {m.paidById === currentUserId ? 'Pagaste tú' : 'Pagó ' + (payer?.name ?? 'alguien')} ·{' '}
                           {formatCurrency(m.amountCents)}
                         </p>

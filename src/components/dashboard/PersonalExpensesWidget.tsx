@@ -100,15 +100,12 @@ export const PersonalExpensesWidget: React.FC<PersonalExpensesWidgetProps> = ({
     return (
       <Card className="bg-gradient-to-br from-indigo-50/70 via-slate-50 to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-slate-900 border border-indigo-100 dark:border-indigo-900/50 p-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-2xl shrink-0 mt-0.5">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-2xl shrink-0">
               <User className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Control de Finanzas Personales</h3>
-              <p className="text-xs text-slate-500 mt-1 max-w-xl">
-                ¿Quieres registrar ingresos y gastos propios sin mezclarlos con deudas compartidas? Puedes crear un <strong>Espacio individual</strong> desde Mis Grupos.
-              </p>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">Control de Finanzas Personales</h3>
             </div>
           </div>
           <Link

@@ -73,9 +73,6 @@ export const ActivityPage: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Historial de Actividad
         </h1>
-        <p className="text-sm text-slate-500">
-          Registro cronológico detallado de todos los movimientos, gastos compartidos, préstamos y devoluciones.
-        </p>
       </div>
 
       {/* Barra de Filtros y Búsqueda */}

@@ -190,8 +190,8 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 h-full w-full sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-3xl flex flex-col shadow-2xl border-0 sm:border sm:border-slate-100 dark:sm:border-slate-800 overflow-hidden animate-in fade-in duration-150">
         {/* Header */}
         <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div>
