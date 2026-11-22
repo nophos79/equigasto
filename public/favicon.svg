@@ -1,10 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="brandGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4338ca"/>
-      <stop offset="100%" stop-color="#6366f1"/>
+    <linearGradient id="auroraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="30%" stop-color="#06b6d4"/>
+      <stop offset="70%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
     </linearGradient>
+    <filter id="softGlow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#brandGrad)"/>
-  <text x="50%" y="53%" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="340" font-weight="bold">€</text>
+
+  <!-- Ice-white squircle card -->
+  <rect x="24" y="24" width="464" height="464" rx="108" fill="#f8fafc" stroke="#e2e8f0" stroke-width="6"/>
+
+  <g filter="url(#softGlow)" fill="none" stroke="url(#auroraGrad)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Euro main arc (C-curve) -->
+    <path d="M 330 185 A 120 120 0 1 0 330 327" />
+
+    <!-- Top bar with arrow pointing right -->
+    <path d="M 160 226 L 315 226" />
+    <path d="M 285 196 L 318 226 L 285 256" />
+
+    <!-- Bottom bar with arrow pointing left -->
+    <path d="M 310 286 L 155 286" />
+    <path d="M 185 256 L 152 286 L 185 316" />
+  </g>
 </svg>

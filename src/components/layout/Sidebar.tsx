@@ -23,9 +23,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentUser, onOpenNewMovement
       <div>
         {/* Brand */}
         <div className="flex items-center gap-3 px-2 py-1 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-brand-500/20">
-            €
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}pwa-192x192.png`}
+            alt="EquiGasto Logo"
+            className="w-10 h-10 rounded-xl shadow-sm object-cover border border-slate-100 dark:border-slate-800"
+          />
           <div>
             <h1 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">EquiGasto</h1>
             <p className="text-xs text-slate-400 dark:text-slate-400">Control de deudas y gastos</p>

@@ -16,9 +16,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onOpenNewMovement }
     <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 sm:px-6 py-3 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center font-bold text-lg shadow-sm shadow-brand-500/30">
-            €
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}pwa-192x192.png`}
+            alt="EquiGasto Logo"
+            className="w-9 h-9 rounded-xl shadow-sm object-cover border border-slate-100 dark:border-slate-800"
+          />
           <div>
             <span className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">EquiGasto</span>
             <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 rounded-full border border-transparent dark:border-brand-800/40">
