@@ -874,31 +874,42 @@ export const GroupDetailPage: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              max="100"
-                              placeholder="0"
-                              value={percentageInputs[m.userId] !== undefined ? percentageInputs[m.userId] : (memberPercentages[m.userId] ?? m.percentage)}
+                              type="text"
+                              inputMode="decimal"
+                              maxLength={6}
+                              placeholder="0,00"
+                              disabled={!isGroupAdmin}
+                              value={percentageInputs[m.userId] !== undefined ? percentageInputs[m.userId] : formatPercentage(memberPercentages[m.userId] ?? m.percentage, false)}
+                              onFocus={(e) => e.target.select()}
                               onChange={(e) => {
-                                const valStr = e.target.value;
-                                setPercentageInputs((prev) => ({ ...prev, [m.userId]: valStr }));
-                                const num = parseFloat(valStr);
+                                const raw = e.target.value.replace(',', '.');
+                                if (raw === '') {
+                                  setPercentageInputs((prev) => ({ ...prev, [m.userId]: '' }));
+                                  setMemberPercentages((prev) => ({ ...prev, [m.userId]: 0 }));
+                                  return;
+                                }
+                                // Máximo 2 cifras enteras (o 100) y hasta 2 decimales
+                                if (!/^(100(\.0{0,2})?|\d{0,2}(\.\d{0,2})?)$/.test(raw)) {
+                                  return;
+                                }
+                                setPercentageInputs((prev) => ({ ...prev, [m.userId]: e.target.value }));
+                                const num = parseFloat(raw);
                                 setMemberPercentages((prev) => ({ ...prev, [m.userId]: isNaN(num) ? 0 : num }));
                               }}
                               onBlur={() => {
                                 const current = memberPercentages[m.userId] || 0;
                                 const clamped = Math.min(100, Math.max(0, current));
+                                const rounded = Number(clamped.toFixed(2));
                                 setPercentageInputs((prev) => ({
                                   ...prev,
-                                  [m.userId]: clamped.toString(),
+                                  [m.userId]: formatPercentage(rounded, false),
                                 }));
                                 setMemberPercentages((prev) => ({
                                   ...prev,
-                                  [m.userId]: clamped,
+                                  [m.userId]: rounded,
                                 }));
                               }}
-                              className="w-20 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-800 dark:text-white focus:ring-1 focus:ring-brand-500"
+                              className="w-24 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-800 dark:text-white focus:ring-1 focus:ring-brand-500 disabled:opacity-60"
                             />
                             <span className="text-slate-400 font-bold">%</span>
                           </div>
