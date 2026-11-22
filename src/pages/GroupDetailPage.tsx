@@ -7,6 +7,9 @@ import {
   UserPlus,
   Save,
   Percent,
+  Pencil,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { repository } from '../data/index';
 import { MovementImpact } from '../components/movements/MovementImpact';
@@ -55,12 +58,14 @@ export const GroupDetailPage: React.FC = () => {
   // Estados de Configuración de Grupo
   const [editGroupName, setEditGroupName] = useState('');
   const [editGroupDesc, setEditGroupDesc] = useState('');
+  const [editGroupIcon, setEditGroupIcon] = useState('🏖️');
   const [editSplitMode, setEditSplitMode] = useState<SplitMode>('EQUAL');
   const [memberPercentages, setMemberPercentages] = useState<Record<string, number>>({});
   const [percentageInputs, setPercentageInputs] = useState<Record<string, string>>({});
   const [newMemberName, setNewMemberName] = useState('');
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [configSuccessMsg, setConfigSuccessMsg] = useState('');
+  const [configErrorMsg, setConfigErrorMsg] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [isDeletingGroup, setIsDeletingGroup] = useState(false);
@@ -102,12 +107,16 @@ export const GroupDetailPage: React.FC = () => {
     if (grp && !silent) {
       setEditGroupName(grp.name);
       setEditGroupDesc(grp.description || '');
+      setEditGroupIcon(grp.icon || '🏖️');
       setEditSplitMode(grp.defaultSplitMode);
       const pMap: Record<string, number> = {};
+      const pInputs: Record<string, string> = {};
       grp.members.forEach((m) => {
         pMap[m.userId] = m.percentage;
+        pInputs[m.userId] = formatPercentage(m.percentage, false);
       });
       setMemberPercentages(pMap);
+      setPercentageInputs(pInputs);
     }
 
     setLoading(false);
@@ -168,12 +177,35 @@ export const GroupDetailPage: React.FC = () => {
   const totalPercentageSum = Object.values(memberPercentages).reduce((acc, v) => acc + (v || 0), 0);
   const isPercentageValid = Math.abs(totalPercentageSum - 100) < 0.05;
 
+  const handleDistributeEqually = () => {
+    if (!group || group.members.length === 0) return;
+    const count = group.members.length;
+    const base = Math.floor(10000 / count) / 100;
+    const remCents = Math.round((100 - base * count) * 100);
+    const newPercentages: Record<string, number> = {};
+    const newInputs: Record<string, string> = {};
+
+    group.members.forEach((m, idx) => {
+      const val = idx < remCents ? Number((base + 0.01).toFixed(2)) : Number(base.toFixed(2));
+      newPercentages[m.userId] = val;
+      newInputs[m.userId] = formatPercentage(val, false);
+    });
+
+    setMemberPercentages(newPercentages);
+    setPercentageInputs(newInputs);
+  };
+
   const handleSaveConfig = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editGroupName.trim()) return;
+    setConfigSuccessMsg('');
+    setConfigErrorMsg('');
+    if (!editGroupName.trim()) {
+      setConfigErrorMsg('El nombre del grupo no puede estar vacío.');
+      return;
+    }
 
     if (editSplitMode === 'PERCENTAGE' && !isPercentageValid) {
-      alert(`La suma de los porcentajes debe ser exactamente 100% (actualmente: ${formatPercentage(totalPercentageSum)})`);
+      setConfigErrorMsg(`La suma de los porcentajes debe ser exactamente 100% (actualmente: ${formatPercentage(totalPercentageSum)})`);
       return;
     }
 
@@ -181,22 +213,23 @@ export const GroupDetailPage: React.FC = () => {
     try {
       const updatedMembers = group.members.map((m) => ({
         ...m,
-        percentage: memberPercentages[m.userId] ?? m.percentage,
+        percentage: editSplitMode === 'PERCENTAGE' ? (memberPercentages[m.userId] ?? m.percentage) : m.percentage,
       }));
 
       await repository.updateGroup(group.id, {
         name: editGroupName.trim(),
         description: editGroupDesc.trim() || undefined,
+        icon: editGroupIcon,
         defaultSplitMode: editSplitMode,
         members: updatedMembers,
       });
 
       setConfigSuccessMsg('Configuración guardada correctamente');
-      setTimeout(() => setConfigSuccessMsg(''), 3000);
+      setTimeout(() => setConfigSuccessMsg(''), 4000);
       triggerRefresh();
     } catch (err) {
       console.error(err);
-      alert('Error al guardar la configuración');
+      setConfigErrorMsg(err instanceof Error ? err.message : 'Error al guardar la configuración');
     } finally {
       setIsSavingConfig(false);
     }
@@ -284,9 +317,19 @@ export const GroupDetailPage: React.FC = () => {
                 {group.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
-                  {group.name}
-                </h1>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
+                    {group.name}
+                  </h1>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('config')}
+                    className="p-1 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition shrink-0"
+                    title="Editar datos del grupo"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 {group.description && (
                   <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
                     {group.description}
@@ -676,8 +719,14 @@ export const GroupDetailPage: React.FC = () => {
         <div className="space-y-6">
           {configSuccessMsg && (
             <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-2xl flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              {configSuccessMsg}
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{configSuccessMsg}</span>
+            </div>
+          )}
+          {configErrorMsg && (
+            <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-2xl flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{configErrorMsg}</span>
             </div>
           )}
 
@@ -686,9 +735,32 @@ export const GroupDetailPage: React.FC = () => {
             <Card className="space-y-4">
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Configuración del Grupo</h3>
 
+              {/* Icono / Emoji */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">
+                  Icono / Emoji del Grupo
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {['🏖️', '🏠', '🎾', '🍻', '🚗', '🎁', '👤', '💼', '📊', '💳', '🛒', '☕'].map((emoji) => (
+                    <button
+                      type="button"
+                      key={emoji}
+                      onClick={() => setEditGroupIcon(emoji)}
+                      className={`text-xl p-2 sm:p-2.5 rounded-xl border transition-all ${
+                        editGroupIcon === emoji
+                          ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/60 scale-105'
+                          : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 bg-white dark:bg-slate-800/60'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                     Nombre del Grupo
                   </label>
                   <input
@@ -702,7 +774,7 @@ export const GroupDetailPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">
                     Descripción
                   </label>
                   <input
@@ -721,7 +793,16 @@ export const GroupDetailPage: React.FC = () => {
                 </label>
                 <CustomSelect
                   value={editSplitMode}
-                  onChange={(val) => setEditSplitMode(val as SplitMode)}
+                  onChange={(val) => {
+                    const mode = val as SplitMode;
+                    setEditSplitMode(mode);
+                    if (mode === 'PERCENTAGE') {
+                      const currentSum = Object.values(memberPercentages).reduce((acc, v) => acc + (v || 0), 0);
+                      if (Math.abs(currentSum - 100) >= 0.05) {
+                        handleDistributeEqually();
+                      }
+                    }
+                  }}
                   options={splitModeConfigOptions}
                   buttonClassName="w-full py-2.5 px-3.5 text-sm"
                 />
@@ -733,17 +814,28 @@ export const GroupDetailPage: React.FC = () => {
               {/* Ajuste de Porcentajes */}
               {editSplitMode === 'PERCENTAGE' && (
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1">
                       <Percent className="w-3.5 h-3.5" /> Asignación de porcentajes por miembro:
                     </span>
-                    <span
-                      className={`text-xs font-bold ${
-                        isPercentageValid ? 'text-emerald-600' : 'text-rose-600'
-                      }`}
-                    >
-                      Total: {formatPercentage(totalPercentageSum)} {isPercentageValid ? '✓' : '(Debe sumar 100%)'}
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      <button
+                        type="button"
+                        onClick={handleDistributeEqually}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950/60 hover:bg-brand-100 dark:hover:bg-brand-900/40 rounded-lg transition"
+                        title="Dividir 100% a partes iguales entre todos los miembros"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>A partes iguales</span>
+                      </button>
+                      <span
+                        className={`text-xs font-bold ${
+                          isPercentageValid ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+                        }`}
+                      >
+                        Total: {formatPercentage(totalPercentageSum)} {isPercentageValid ? '✓' : '(Debe sumar 100%)'}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -752,7 +844,7 @@ export const GroupDetailPage: React.FC = () => {
                       return (
                         <div
                           key={m.userId}
-                          className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs"
+                          className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-xs"
                         >
                           <div className="flex items-center gap-2">
                             <Avatar
@@ -760,26 +852,20 @@ export const GroupDetailPage: React.FC = () => {
                               url={u?.avatarUrl}
                               size="sm"
                             />
-                            <span className="font-medium text-slate-800">{u?.name}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{u?.name}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <input
-                              type="text"
-                              inputMode="decimal"
-                              placeholder="0,00"
-                              value={percentageInputs[m.userId] ?? formatPercentage(memberPercentages[m.userId] ?? m.percentage, false)}
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              placeholder="0"
+                              value={percentageInputs[m.userId] !== undefined ? percentageInputs[m.userId] : (memberPercentages[m.userId] ?? m.percentage)}
                               onChange={(e) => {
-                                const raw = e.target.value.replace(',', '.');
-                                if (raw === '') {
-                                  setPercentageInputs((prev) => ({ ...prev, [m.userId]: '' }));
-                                  setMemberPercentages((prev) => ({ ...prev, [m.userId]: 0 }));
-                                  return;
-                                }
-                                // Limitar: máximo 3 dígitos enteros y hasta 2 decimales
-                                if (!/^\d{0,3}(\.\d{0,2})?$/.test(raw)) return;
-                                const num = parseFloat(raw);
-                                if (!isNaN(num) && num > 100) return;
-                                setPercentageInputs((prev) => ({ ...prev, [m.userId]: e.target.value }));
+                                const valStr = e.target.value;
+                                setPercentageInputs((prev) => ({ ...prev, [m.userId]: valStr }));
+                                const num = parseFloat(valStr);
                                 setMemberPercentages((prev) => ({ ...prev, [m.userId]: isNaN(num) ? 0 : num }));
                               }}
                               onBlur={() => {
@@ -787,14 +873,14 @@ export const GroupDetailPage: React.FC = () => {
                                 const clamped = Math.min(100, Math.max(0, current));
                                 setPercentageInputs((prev) => ({
                                   ...prev,
-                                  [m.userId]: formatPercentage(clamped, false),
+                                  [m.userId]: clamped.toString(),
                                 }));
                                 setMemberPercentages((prev) => ({
                                   ...prev,
                                   [m.userId]: clamped,
                                 }));
                               }}
-                              className="w-24 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-800 dark:text-white focus:ring-1 focus:ring-brand-500"
+                              className="w-20 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-right font-bold text-slate-800 dark:text-white focus:ring-1 focus:ring-brand-500"
                             />
                             <span className="text-slate-400 font-bold">%</span>
                           </div>

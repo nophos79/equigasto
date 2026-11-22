@@ -14,6 +14,8 @@ interface CustomSelectProps {
   className?: string;
   buttonClassName?: string;
   menuClassName?: string;
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 export const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -24,11 +26,15 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
   className = '',
   buttonClassName = '',
   menuClassName = '',
+  placeholder,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const selectedOption = options.find((o) => o.value === value) || options[0];
+  const selectedOption = options.find((o) => o.value === value);
+  const displayLabel = selectedOption?.label || (placeholder && !value ? placeholder : value);
+  const isPlaceholderActive = !selectedOption && Boolean(placeholder);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,10 +68,15 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
       <div className="relative flex-1 min-w-0">
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20 flex items-center justify-between gap-1.5 cursor-pointer shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-750 transition-all ${buttonClassName}`}
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm rounded-xl px-2.5 py-1.5 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500/20 flex items-center justify-between gap-1.5 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-750 transition-all ${
+            disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+          } ${buttonClassName}`}
         >
-          <span className="truncate">{selectedOption?.label || value}</span>
+          <span className={`truncate ${isPlaceholderActive ? 'text-slate-400 font-normal' : ''}`}>
+            {displayLabel}
+          </span>
           <ChevronDown
             className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200 ${
               isOpen ? 'rotate-180' : ''
@@ -74,7 +85,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
         </button>
 
         {isOpen && (
-          <div className={`absolute left-0 mt-1.5 min-w-full z-50 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-100 ${menuClassName || 'w-max max-w-md'}`}>
+          <div className={`absolute left-0 mt-1.5 min-w-full z-[70] max-h-60 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700/90 rounded-2xl shadow-xl shadow-slate-900/10 dark:shadow-black/50 p-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-100 ${menuClassName || 'w-max max-w-md'}`}>
             {options.map((option) => {
               const isSelected = option.value === value;
               return (

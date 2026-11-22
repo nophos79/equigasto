@@ -179,21 +179,38 @@ export class SupabaseRepository implements IDataRepository {
 
   async updateGroup(id: string, groupData: Partial<Group>): Promise<Group> {
     const updatePayload: any = {};
-    if (groupData.name !== undefined) updatePayload.name = groupData.name;
-    if (groupData.description !== undefined) updatePayload.description = groupData.description;
+    if (groupData.name !== undefined) updatePayload.name = groupData.name.trim();
+    if (groupData.description !== undefined) {
+      updatePayload.description = groupData.description && groupData.description.trim() ? groupData.description.trim() : null;
+    }
     if (groupData.icon !== undefined) updatePayload.icon = groupData.icon;
     if (groupData.defaultSplitMode !== undefined) updatePayload.default_split_mode = groupData.defaultSplitMode;
 
     if (Object.keys(updatePayload).length > 0) {
-      await supabase.from('groups').update(updatePayload).eq('id', id);
+      const { data, error } = await supabase
+        .from('groups')
+        .update(updatePayload)
+        .eq('id', id)
+        .select('id');
+
+      if (error) {
+        throw new Error('Error al actualizar el grupo: ' + error.message);
+      }
+      if (!data || data.length === 0) {
+        throw new Error('No se pudo actualizar el grupo: permiso denegado o grupo no encontrado.');
+      }
     }
 
-    if (groupData.members) {
+    if (groupData.members && groupData.members.length > 0) {
       for (const m of groupData.members) {
-        await supabase
+        const { error: mError } = await supabase
           .from('group_members')
           .update({ percentage: m.percentage, role: m.role })
           .match({ group_id: id, user_id: m.userId });
+
+        if (mError) {
+          throw new Error('Error al actualizar miembro: ' + mError.message);
+        }
       }
     }
 

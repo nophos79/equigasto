@@ -9,6 +9,7 @@ import { Card } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { MovementDetailModal } from '../components/movements/MovementDetailModal';
 import { NewMovementModal } from '../components/movements/NewMovementModal';
+import { CustomSelect } from '../components/common/CustomSelect';
 
 export const ActivityPage: React.FC = () => {
   const { refreshTrigger, triggerRefresh } = useOutletContext<{ refreshTrigger: number; triggerRefresh: () => void }>();
@@ -92,52 +93,50 @@ export const ActivityPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1">
           {/* Grupo */}
-          <select
+          <CustomSelect
             value={selectedGroup}
-            onChange={(e) => setSelectedGroup(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
-          >
-            <option value="ALL">Todos los grupos</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.icon} {g.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setSelectedGroup(val)}
+            options={[
+              { value: 'ALL', label: 'Todos los grupos' },
+              ...groups.map((g) => ({ value: g.id, label: `${g.icon} ${g.name}` })),
+            ]}
+            buttonClassName="py-2 px-3 text-xs"
+          />
 
           {/* Tipo */}
-          <select
+          <CustomSelect
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
-          >
-            <option value="ALL">Todos los tipos</option>
-            <option value="SHARED_EXPENSE">Compartidos</option>
-            <option value="INDIVIDUAL_EXPENSE">Adelantos individuales</option>
-            <option value="LOAN">Préstamos</option>
-            <option value="SETTLEMENT">Liquidaciones</option>
-            <option value="INCOME">Ingresos</option>
-          </select>
+            onChange={(val) => setSelectedType(val)}
+            options={[
+              { value: 'ALL', label: 'Todos los tipos' },
+              { value: 'SHARED_EXPENSE', label: 'Compartidos' },
+              { value: 'INDIVIDUAL_EXPENSE', label: 'Adelantos individuales' },
+              { value: 'LOAN', label: 'Préstamos' },
+              { value: 'SETTLEMENT', label: 'Liquidaciones' },
+              { value: 'INCOME', label: 'Ingresos' },
+            ]}
+            buttonClassName="py-2 px-3 text-xs"
+          />
 
           {/* Miembro */}
-          <select
+          <CustomSelect
             value={selectedMember}
-            onChange={(e) => setSelectedMember(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium focus:outline-none"
-          >
-            <option value="ALL">Cualquier participante</option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name} {u.id === currentUser?.id ? '(Tú)' : ''}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setSelectedMember(val)}
+            options={[
+              { value: 'ALL', label: 'Cualquier participante' },
+              ...users.map((u) => ({
+                value: u.id,
+                label: `${u.name} ${u.id === currentUser?.id ? '(Tú)' : ''}`,
+              })),
+            ]}
+            buttonClassName="py-2 px-3 text-xs"
+          />
 
           {/* Orden de fecha */}
           <button
             type="button"
             onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
-            className="flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100"
+            className="flex items-center justify-center gap-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs rounded-xl px-3 py-2 text-slate-700 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors"
           >
             <ArrowUpDown className="w-3.5 h-3.5" />
             <span>{sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'}</span>

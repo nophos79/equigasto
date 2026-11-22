@@ -6,6 +6,7 @@ import { eurosToCents, centsToEuros, splitEqually, formatCurrency, formatPercent
 import { splitByPercentages } from '../../core/split';
 import { validateSettlement } from '../../core/settlement';
 import { repository } from '../../data/index';
+import { CustomSelect } from '../common/CustomSelect';
 
 interface NewMovementModalProps {
   groups: Group[];
@@ -298,19 +299,16 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
           {/* Grupo */}
           <div>
             <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Grupo</label>
-            <select
-              required
+            <CustomSelect
               value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer"
-            >
-              <option value="" disabled>Selecciona un grupo...</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.icon} {g.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedGroupId(val)}
+              options={groups.map((g) => ({
+                value: g.id,
+                label: `${g.icon} ${g.name}`,
+              }))}
+              placeholder="Selecciona un grupo..."
+              buttonClassName="w-full py-2.5 px-3.5 text-sm font-medium"
+            />
           </div>
 
           {/* Importe grande */}
@@ -369,17 +367,15 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                   ? 'Quién devuelve dinero'
                   : 'Quién ha pagado'}
               </label>
-              <select
+              <CustomSelect
                 value={paidById}
-                onChange={(e) => setPaidById(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
-              >
-                {groupMembers.map((m) => (
-                  <option key={m.userId} value={m.userId}>
-                    {m.name} {m.userId === currentUser.id ? '(Tú)' : ''}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setPaidById(val)}
+                options={groupMembers.map((m) => ({
+                  value: m.userId,
+                  label: `${m.name} ${m.userId === currentUser.id ? '(Tú)' : ''}`,
+                }))}
+                buttonClassName="w-full py-2 px-3 text-sm"
+              />
             </div>
 
             {type !== 'SHARED_EXPENSE' && (
@@ -391,19 +387,17 @@ export const NewMovementModal: React.FC<NewMovementModalProps> = ({
                     ? 'Quién debe el 100%'
                     : 'Quién recibe la devolución'}
                 </label>
-                <select
+                <CustomSelect
                   value={recipientId}
-                  onChange={(e) => setRecipientId(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                >
-                  {groupMembers
+                  onChange={(val) => setRecipientId(val)}
+                  options={groupMembers
                     .filter((m) => m.userId !== paidById)
-                    .map((m) => (
-                      <option key={m.userId} value={m.userId}>
-                        {m.name} {m.userId === currentUser.id ? '(Tú)' : ''}
-                      </option>
-                    ))}
-                </select>
+                    .map((m) => ({
+                      value: m.userId,
+                      label: `${m.name} ${m.userId === currentUser.id ? '(Tú)' : ''}`,
+                    }))}
+                  buttonClassName="w-full py-2 px-3 text-sm"
+                />
               </div>
             )}
           </div>
