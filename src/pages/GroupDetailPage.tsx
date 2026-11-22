@@ -10,6 +10,7 @@ import {
   Pencil,
   AlertCircle,
   RefreshCw,
+  Shield,
 } from 'lucide-react';
 import { repository } from '../data/index';
 import { MovementImpact } from '../components/movements/MovementImpact';
@@ -172,6 +173,7 @@ export const GroupDetailPage: React.FC = () => {
 
   const settlementMovements = movements.filter((m) => m.type === 'SETTLEMENT');
   const currentUserBalance = balances.find((b) => b.userId === currentUser.id);
+  const isGroupAdmin = currentUser ? (currentUser.id === group.createdBy || currentUser.isAdmin) : false;
 
   // Validación de porcentajes en configuración
   const totalPercentageSum = Object.values(memberPercentages).reduce((acc, v) => acc + (v || 0), 0);
@@ -321,14 +323,16 @@ export const GroupDetailPage: React.FC = () => {
                   <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight truncate min-w-0" title={group.name}>
                     {group.name}
                   </h1>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('config')}
-                    className="p-1 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition shrink-0"
-                    title="Editar datos del grupo"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
+                  {isGroupAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('config')}
+                      className="p-1 text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition shrink-0"
+                      title="Editar datos del grupo"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
                 {group.description && (
                   <p className="text-xs text-slate-500 mt-0.5 truncate min-w-0" title={group.description}>
@@ -730,10 +734,24 @@ export const GroupDetailPage: React.FC = () => {
             </div>
           )}
 
+          {!isGroupAdmin && (
+            <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-2xl flex items-center gap-2">
+              <Shield className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Solo el creador del grupo o un administrador pueden modificar el nombre, icono, modalidad de reparto y porcentajes.</span>
+            </div>
+          )}
+
           {/* Formulario de Configuración Básica y Reparto */}
           <form onSubmit={handleSaveConfig}>
             <Card className="space-y-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Configuración del Grupo</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Configuración del Grupo</h3>
+                {!isGroupAdmin && (
+                  <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full">
+                    Modo solo lectura
+                  </span>
+                )}
+              </div>
 
               {/* Icono / Emoji */}
               <div>
@@ -891,16 +909,18 @@ export const GroupDetailPage: React.FC = () => {
                 </div>
               )}
 
-              <div className="pt-3">
-                <button
-                  type="submit"
-                  disabled={isSavingConfig || (editSplitMode === 'PERCENTAGE' && !isPercentageValid)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{isSavingConfig ? 'Guardando...' : 'Guardar Configuración'}</span>
-                </button>
-              </div>
+              {isGroupAdmin && (
+                <div className="pt-3">
+                  <button
+                    type="submit"
+                    disabled={isSavingConfig || (editSplitMode === 'PERCENTAGE' && !isPercentageValid)}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{isSavingConfig ? 'Guardando...' : 'Guardar Configuración'}</span>
+                  </button>
+                </div>
+              )}
             </Card>
           </form>
 
