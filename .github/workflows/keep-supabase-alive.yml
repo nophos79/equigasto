@@ -1,0 +1,33 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs every Monday and Thursday at 08:15 UTC (well under the 7-day pause limit)
+    - cron: '15 8 * * 1,4'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase RPC endpoint
+        env:
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY repository secrets."
+            exit 1
+          fi
+          BASE_URL="${SUPABASE_URL%/}"
+          STATUS=$(curl -sS -o /tmp/ping_response.txt -w "%{http_code}" \
+            "${BASE_URL}/rest/v1/rpc/ping" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "HTTP status: ${STATUS}"
+          cat /tmp/ping_response.txt
+          echo ""
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Keep-alive ping failed with HTTP ${STATUS}"
+            exit 1
+          fi

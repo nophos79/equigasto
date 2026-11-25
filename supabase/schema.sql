@@ -471,6 +471,17 @@ begin
 end;
 $$;
 
+-- Función keep-alive sin exposición de datos para evitar pausa por inactividad
+create or replace function public.ping()
+returns text
+language sql
+stable
+security invoker
+set search_path = public
+as $$
+  select 'ok'::text;
+$$;
+
 -- 14. PERMISOS
 grant usage on schema public to authenticated, anon;
 grant select, insert, update, delete on public.profiles to authenticated;
@@ -488,6 +499,7 @@ grant execute on function public.is_current_user_approved() to authenticated;
 grant execute on function public.get_pending_approval_profiles() to authenticated;
 grant execute on function public.approve_user_profile(uuid) to authenticated;
 grant execute on function public.reject_user_profile(uuid) to authenticated;
+grant execute on function public.ping() to anon, authenticated;
 
 -- 15. PUBLICACIÓN REALTIME
 do $$
